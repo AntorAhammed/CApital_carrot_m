@@ -1,0 +1,37 @@
+html{
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(89.72deg, #041442 0.22%, #4e035f 99.75%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: contain;
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  width: 100%;
+}
+
+a{
+  text-decoration: none;
+}
+li{
+  list-style: none;
+}
+
+.container{
+  width: 80%;
+  margin : 0px auto;
+}
+
+
+/* =========================
+        CSS Import
+   ========================== */
+
+   @import url("./Components/Navbar//Navbar.css");
+   @import url("./Components/Banner/Banner.css");
+   @import url("./Components/Slider/Slider.css");
+   @import url("./Components/Footer/Footer.css");

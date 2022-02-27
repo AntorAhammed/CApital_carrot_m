@@ -1,0 +1,73 @@
+.banner{
+    margin-top: 50px;
+    background: linear-gradient(89.72deg, rgba(91, 134, 255, 0.36) 0.22%, rgba(213, 21, 254, 0.36) 99.75%);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 16px;
+}
+.banner_content{
+    margin-top: 50px;
+    padding: 30px 45px;
+    display : flex;
+    justify-content: space-between;
+}
+.adranaline_box{
+    display: flex;
+}
+.adranaline_box img{
+    margin-right: 30px;
+}
+.adranaline_box_content .new{
+    background: linear-gradient(89.72deg, #5B86FF 0.22%, #D515FE 99.75%);
+    padding: 6px 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 20px;
+    width: 65px;
+    border-radius: 32px;
+
+}
+.adranaline_box_content .hot{
+    background:  #F36F17;;
+    padding: 6px 15px;
+    height: 20px;
+    width: 65px;
+    border-radius: 32px;
+}
+.adranaline_box_content .fee{
+    font-size: 14px;
+}
+.go_back p{
+    display : flex;
+    font-size: 18px;
+}
+.go_back span{
+    font-size: 20px;
+    margin-right: 4px;
+}
+
+@media (max-width: 850px) {
+    .banner_content{
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+@media (max-width: 700px) {
+    .banner_content{
+        padding: 30px 10px;
+        display : flex;
+        justify-content: space-between;
+    }
+    .adranaline_box_content .new{
+        display:none;
+    }
+    .adranaline_box_content .hot{
+        display:none;
+    }
+    .adranaline_box img{
+        height: 100px;
+        width: 100px;
+        margin-left: 10px;
+    }
+}

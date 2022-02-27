@@ -1,0 +1,27 @@
+.footer{
+    padding: 80px 0px;
+    display: flex;
+    justify-content:center;
+    align-items: center;
+}
+.footer img{
+    height: 20px ;
+    width : 20px;
+    align-content: center;
+    margin-right: 10px;
+}
+.detail{
+    display: flex;
+}
+.detail button{
+    border: none;
+    background: linear-gradient(89.72deg, #5B86FF 0.22%, #D515FE 99.75%);
+    border-radius: 8px;
+    padding: 8px 35px;
+    margin-left: 20px;
+    color : #fff;
+    font-weight: 500;
+    font-style: normal;
+    font-weight: 500;
+    cursor: pointer;
+}
