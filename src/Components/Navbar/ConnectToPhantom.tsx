@@ -1,12 +1,40 @@
 import { useEffect, useState } from "react";
+import { PublicKey, Transaction } from '@solana/web3.js';
 
 type Event = "connect" | "disconnect";
+type DisplayEncoding = "utf8" | "hex";
+type PhantomEvent = "disconnect" | "connect";
+type PhantomRequestMethod =
+  | "connect"
+  | "disconnect"
+  | "signTransaction"
+  | "signAllTransactions"
+  | "signMessage";
 
-interface Phantom {
-  on: (event: Event, callback: () => void) => void;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
+interface ConnectOpts {
+  onlyIfTrusted: boolean;
 }
+interface Phantom {
+  publicKey: PublicKey | null;
+  isConnected: boolean | null;
+  autoApprove: boolean | null;
+  signTransaction: (transaction: Transaction) => Promise<Transaction>;
+  signAllTransactions: (transactions: Transaction[]) => Promise<Transaction[]>;
+  signMessage: (
+    message: Uint8Array | string,
+    display?: DisplayEncoding
+  ) => Promise<any>;
+  connect: (opts?: Partial<ConnectOpts>) => Promise<void>;
+  disconnect: () => Promise<void>;
+  on: (event: PhantomEvent, handler: (args: any) => void) => void;
+  request: (method: PhantomRequestMethod, params: any) => Promise<any>;
+}
+
+// interface Phantom {
+//   on: (event: Event, callback: () => void) => void;
+//   connect: () => Promise<void>;
+//   disconnect: () => Promise<void>;
+// }
 
 const ConnectToPhantom = () => {
   const [phantom, setPhantom] = useState<Phantom | null>(null);
@@ -34,7 +62,6 @@ const ConnectToPhantom = () => {
       const solana = (window as { [key: string]: any })["solana"];
       try {
         const response = await solana.connect();
-        console.log('wallet account ', response.publicKey.toString());
 
         (window as { [key: string]: any })["curWallet"] = response;//.publicKey.toString();
 

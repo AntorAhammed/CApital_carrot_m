@@ -1,11 +1,11 @@
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData"
 import SliderJS from "react-slick";
 
-const Slider = () => {
+const Slider = (props) => {
   const config = {
     dots: false,
     infinite: true,
@@ -48,6 +48,15 @@ const Slider = () => {
       }
     ]
   };
+
+  let slider;
+
+  // useEffect(() => {
+
+  //   this.slider.slickGoTo(props.jumpItem);
+
+  // }, [props.jumpItem]);
+
   return (
     <div className="container" style={{marginTop: "50px"}}>
         <SliderJS {...config}>

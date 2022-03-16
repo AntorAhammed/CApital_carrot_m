@@ -1,0 +1,183 @@
+{
+  "version": "0.1.0",
+  "name": "spin_win",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "initializer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "poolBump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setItem",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "rand",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tokenVaultBump",
+          "type": "u8"
+        },
+        {
+          "name": "ratio",
+          "type": {
+            "array": [
+              "u8",
+              15
+            ]
+          }
+        },
+        {
+          "name": "amount",
+          "type": {
+            "array": [
+              "u64",
+              15
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "spinWheel",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "sourceRewardAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destRewardAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "SpinItemList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ratioList",
+            "type": {
+              "array": [
+                "u8",
+                15
+              ]
+            }
+          },
+          {
+            "name": "amountList",
+            "type": {
+              "array": [
+                "u64",
+                15
+              ]
+            }
+          },
+          {
+            "name": "lastSpinindex",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "Cuw7DiTqrwe1vzuXUABq3sToxCXauMKT9UsniivXyruM"
+  }
+}

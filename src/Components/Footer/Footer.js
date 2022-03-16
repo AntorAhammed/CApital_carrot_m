@@ -2,12 +2,17 @@ import React from 'react'
 import load from '../Image/load.png'
 // import { useWallet } from "@solana/wallet-adapter-react";
 import { spinWheel } from "../../contexts/helpers";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 
 
-const Footer = () => {
+const Footer = (props) => {
+  const { connection } = useConnection();
+  const wallet = useWallet();
+
   const OnClickSpin = async () => {
-    const wallet = window["curWallet"];
-    spinWheel(wallet);
+    // const wallet = window["curWallet"];
+    const res = spinWheel(wallet, connection);
+    // props.onEndSpin(res);
   }
 
   return (

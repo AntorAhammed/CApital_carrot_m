@@ -30,7 +30,7 @@ import img11 from '../Image/Image/11.png'
 import img12 from '../Image/Image/12.png'
 import img13 from '../Image/Image/13.png'
 import img14 from '../Image/Image/14.png'
-// import img15 from '../Image/Image/15.png5'
+import img15 from '../Image/Image/15.png'
 
 
 
@@ -39,7 +39,7 @@ import img14 from '../Image/Image/14.png'
 const SliderData = [
     {
         imgae : img1,
-        percent : "8%",
+        percent : "2%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : blue,
@@ -47,7 +47,7 @@ const SliderData = [
     },
     {
         imgae : img2,
-        percent : "8%",
+        percent : "2%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : brown,
@@ -55,7 +55,7 @@ const SliderData = [
     },
     {
         imgae : img3,
-        percent : "8%",
+        percent : "2%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : green,
@@ -63,7 +63,7 @@ const SliderData = [
     },
     {
         imgae : img4,
-        percent : "8%",
+        percent : "2%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : pink,
@@ -71,7 +71,7 @@ const SliderData = [
     },
     {
         imgae : img5,
-        percent : "8%",
+        percent : "2%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : yellow,
@@ -79,7 +79,7 @@ const SliderData = [
     },
     {
         imgae : img6,
-        percent : "8%",
+        percent : "10%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : lowPink,
@@ -87,7 +87,7 @@ const SliderData = [
     },
     {
         imgae : img7,
-        percent : "8%",
+        percent : "10%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : darkGreen,
@@ -95,7 +95,7 @@ const SliderData = [
     },
     {
         imgae : img8,
-        percent : "8%",
+        percent : "10%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : red,
@@ -103,7 +103,7 @@ const SliderData = [
     },
     {
         imgae : img9,
-        percent : "8%",
+        percent : "10%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : darkPink,
@@ -111,7 +111,7 @@ const SliderData = [
     },
     {
         imgae : img10,
-        percent : "8%",
+        percent : "10%",
         desc : "uncommon",
         price : "5.00",
         backgroundImage : lightPink,
@@ -149,7 +149,14 @@ const SliderData = [
         backgroundImage : lightGreen,
         backgroundColour : "linear-gradient(0deg, rgba(38, 160, 251, 0.5), rgba(38, 160, 251, 0.5))"
     },
-
+    {
+        imgae : img15,
+        percent : "8%",
+        desc : "uncommon",
+        price : "5.00",
+        backgroundImage : lightGreen,
+        backgroundColour : "linear-gradient(0deg, rgba(38, 160, 251, 0.5), rgba(38, 160, 251, 0.5))"
+    },
 ]
 
 export default SliderData
