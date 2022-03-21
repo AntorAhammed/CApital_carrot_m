@@ -4,6 +4,28 @@ import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
+import { spinWheel } from "../../contexts/helpers";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { AiOutlineConsoleSql } from "react-icons/ai";
+
+import Modal from 'react-modal';
+import { setTokenSourceMapRange } from "typescript";
+
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+  },
+};
+
+Modal.setAppElement('#root');
+
+
 
 const Slider = (props) => {
   const sliderRef = useRef();
@@ -69,14 +91,36 @@ const Slider = (props) => {
 
   // }, [props.jumpItem]);
 
+  const { connection } = useConnection();
+  const wallet = useWallet();
+
   const [arraytoLoop, setarraytoLoop] = useState(SliderData);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stopIndex, setStopIndex] = useState(10);
+  // let stopIndex = 10;
 
   useEffect(() => {
     var repeatedData = ReturnRepeatedData(arraytoLoop);
     setarraytoLoop(repeatedData);
   }, []);
+
+  let subtitle;
+
+  const [modalIsOpen, setIsOpen] = React.useState(false);
+  function openModal() {
+    setIsOpen(true);
+  }
+
+  function afterOpenModal() {
+    // references are now sync'd and can be accessed.
+    subtitle.style.color = '#000000';
+  }
+
+  function closeModal() {
+    setIsOpen(false);
+    spinTheWheel();
+  }
+
 
   const GetIndex = () => {
     var times = 0;
@@ -99,8 +143,27 @@ const Slider = (props) => {
     sliderRef.current.slickGoTo(pauseIndex, false);
   };
 
+  const OnClickSpin = async () => {
+    const itemIndex = await spinWheel(wallet, connection);
+    setStopIndex(itemIndex + 1);
+    openModal();
+  }
+
+
   return (
     <div className="container" style={{ marginTop: "50px" }}>
+      <div>
+        <Modal
+          isOpen={modalIsOpen}
+          onAfterOpen={afterOpenModal}
+          onRequestClose={closeModal}
+          style={customStyles}
+          contentLabel="Example Modal"
+        >
+          <h2 ref={(_subtitle) => (subtitle = _subtitle)}>You could win {stopIndex} item.</h2>
+        </Modal>
+
+      </div>
       <SliderJS {...config} ref={sliderRef}>
         {arraytoLoop &&
           arraytoLoop.map((val, ind) => {
@@ -125,8 +188,8 @@ const Slider = (props) => {
           })}
       </SliderJS>
       <div className="detail">
-        <p onClick={spinTheWheel}>Try for free</p>
-        <button>Open Box</button>
+        {/* <p onClick={spinTheWheel}>Try for free</p> */}
+        <button onClick={OnClickSpin}>Open Box</button>
       </div>
     </div>
   );

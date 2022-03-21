@@ -191,9 +191,8 @@ export const initialize = async (wallet: any, connection: any, transaction: Tran
     let escrowAccount = Keypair.generate().publicKey;
 
     let result = null;
-    try {
-      // transaction.add(
-      result = await program.rpc.initialize(
+    transaction.add(
+      await program.instruction.initialize(
         poolAccountBump,
         {
           accounts: {
@@ -204,21 +203,7 @@ export const initialize = async (wallet: any, connection: any, transaction: Tran
           }
         }
       )
-      // );
-    } catch (error) {
-      console.log('initialize error', error);
-      return false;
-    };
-
-    if (result) {
-      // for testing
-      await testDeposit(wallet, connection);
-      console.log("Successfully init. txHash=" + result, 0);
-      return true;
-    }
-
-    console.log('initialize failed');
-    return false;
+    );
   }
 
   // for testing
@@ -333,7 +318,7 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
     msg += "Collect your reward tokens on website.";
   }
 
-  await claimRewards(wallet, connection, mintA, _state.lastSpinindex + 1);
+  await claimRewards(wallet, connection, transaction, mintA, _state.lastSpinindex + 1);
 
   // let t_vault_account = token_vault_list[_state.lastSpinindex];
   // console.log('spin token vault : ', t_vault_account);
@@ -367,7 +352,6 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
 
   console.log('End to spin_wheel...');
 
-  alert(msg);
   return _state.lastSpinindex;
 }
 
@@ -413,7 +397,7 @@ export const deposit = async (wallet: any, connection: any, mintA: any, amount: 
   );
 }
 
-export const claimRewards = async (wallet: any, connection: any, mintA: any, amount: any) => {
+export const claimRewards = async (wallet: any, connection: any, transaction: Transaction, mintA: any, amount: any) => {
   var myToken = new Token(
     connection,
     mintA.publicKey,
@@ -430,17 +414,19 @@ export const claimRewards = async (wallet: any, connection: any, mintA: any, amo
 
   let bnAmount = amount * (10 ** mintInfo.decimals);
 
-  await program.rpc.claim(
-    new anchor.BN(bnAmount),
-    {
-      accounts: {
-        owner: wallet.publicKey,
-        state: poolAccountPDA,
-        sourceRewardAccount: sourceAccount,
-        destRewardAccount: destAccount.address,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      },
-    });
+  transaction.add(
+    await program.instruction.claim(
+      new anchor.BN(bnAmount),
+      {
+        accounts: {
+          owner: wallet.publicKey,
+          state: poolAccountPDA,
+          sourceRewardAccount: sourceAccount,
+          destRewardAccount: destAccount.address,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      })
+  );
 
   tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
   console.log('~~~~~~~~~~~~~~~~~~~~~~~444', tokenAmount);
