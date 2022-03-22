@@ -8,24 +8,22 @@ import { spinWheel, getItemInfos } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
-import Modal from 'react-modal';
+import Modal from "react-modal";
 import { setTokenSourceMapRange } from "typescript";
-
+import Loader from "../Loader/Loader";
 
 const customStyles = {
   content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)',
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
   },
 };
 
-Modal.setAppElement('#root');
-
-
+Modal.setAppElement("#root");
 
 const Slider = (props) => {
   const sliderRef = useRef();
@@ -97,6 +95,8 @@ const Slider = (props) => {
   const [arraytoLoop, setarraytoLoop] = useState(SliderData);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stopIndex, setStopIndex] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
+  const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
   // let stopIndex = 10;
 
   useEffect(async () => {
@@ -124,14 +124,13 @@ const Slider = (props) => {
 
   function afterOpenModal() {
     // references are now sync'd and can be accessed.
-    subtitle.style.color = '#000000';
+    subtitle.style.color = "#000000";
   }
 
   function closeModal() {
     setIsOpen(false);
     spinTheWheel();
   }
-
 
   const GetIndex = () => {
     var times = 0;
@@ -155,14 +154,16 @@ const Slider = (props) => {
   };
 
   const OnClickSpin = async () => {
+    setIsLoading(true);
     const itemIndex = await spinWheel(wallet, connection);
     setStopIndex(itemIndex + 1);
+    setIsLoading(false);
     openModal();
-  }
-
+  };
 
   return (
     <div className="container" style={{ marginTop: "50px" }}>
+      {isLoading && <Loader />}
       <div>
         <Modal
           isOpen={modalIsOpen}
@@ -171,9 +172,10 @@ const Slider = (props) => {
           style={customStyles}
           contentLabel="Example Modal"
         >
-          <h2 ref={(_subtitle) => (subtitle = _subtitle)}>You could win {stopIndex} item.</h2>
+          <h2 ref={(_subtitle) => (subtitle = _subtitle)}>You've won</h2>
+          <h3>{winnerItem.price} </h3>
+          <img src={winnerItem.imgae} alt="" />
         </Modal>
-
       </div>
       <SliderJS {...config} ref={sliderRef}>
         {arraytoLoop &&
