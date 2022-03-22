@@ -25,6 +25,7 @@
     "react-modal": "^3.14.4",
     "react-notifications": "^1.7.3",
     "react-responsive-carousel": "^3.2.22",
+    "react-router-dom": "^6.2.2",
     "react-scripts": "4.0.3",
     "react-slick": "^0.28.1",
     "slick-carousel": "^1.8.1",

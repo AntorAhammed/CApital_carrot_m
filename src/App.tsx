@@ -3,7 +3,7 @@ import Banner from "./Components/Banner/Banner";
 import Footer from "./Components/Footer/Footer";
 import Navbar from "./Components/Navbar/Navbar";
 import Slider from "./Components/Slider/Slider";
-
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -22,6 +22,7 @@ import { NotificationContainer } from 'react-notifications'
 import 'react-notifications/lib/notifications.css';
 
 import "@solana/wallet-adapter-react-ui/styles.css";
+import Admin from "./screens/admin/Admin";
 
 function App() {
   const network = WalletAdapterNetwork.Devnet;
@@ -29,19 +30,31 @@ function App() {
   const wallets = useMemo(() => [getPhantomWallet()], []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <div>
-            <Navbar />
-            <Banner />
-            <Slider />
-            {/* <Footer /> */}
-          </div>
+    <Router>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <WalletModalProvider>
+            <div>
+              <Navbar />
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <Banner />
+                      <Slider />
+                    </>
+                  }
+                />
+                <Route path="/admin" element={<Admin />} />
+              </Routes>
+              {/* <Footer /> */}
+            </div>
           <NotificationContainer />
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+          </WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </Router>
   );
 }
 
