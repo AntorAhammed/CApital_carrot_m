@@ -4,7 +4,7 @@ import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
-import { spinWheel } from "../../contexts/helpers";
+import { spinWheel, getItemInfos } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
@@ -99,8 +99,19 @@ const Slider = (props) => {
   const [stopIndex, setStopIndex] = useState(10);
   // let stopIndex = 10;
 
-  useEffect(() => {
-    var repeatedData = ReturnRepeatedData(arraytoLoop);
+  useEffect(async () => {
+    let sData = await getItemInfos(wallet);
+    var repeatedData = null;
+    if (sData) {
+      let tmpData = [...arraytoLoop];
+      for (let i = 0; i < sData.ratioList.length; i++) {
+        tmpData[i].percent = sData.ratioList[i] + "%";
+        tmpData[i].price = "" + sData.amountList[i];
+      }
+      repeatedData = ReturnRepeatedData(tmpData);
+    } else {
+      repeatedData = ReturnRepeatedData(arraytoLoop);
+    }
     setarraytoLoop(repeatedData);
   }, []);
 
