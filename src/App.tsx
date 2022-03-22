@@ -3,7 +3,7 @@ import Banner from "./Components/Banner/Banner";
 import Footer from "./Components/Footer/Footer";
 import Navbar from "./Components/Navbar/Navbar";
 import Slider from "./Components/Slider/Slider";
-
+import { Routes, Route, BrowserRouter as Router } from "react-router-dom";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -20,6 +20,7 @@ import { clusterApiUrl } from "@solana/web3.js";
 import { useMemo } from "react";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
+import Admin from "./screens/admin/Admin";
 
 function App() {
   const network = WalletAdapterNetwork.Devnet;
@@ -27,18 +28,30 @@ function App() {
   const wallets = useMemo(() => [getPhantomWallet()], []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <div>
-            <Navbar />
-            <Banner />
-            <Slider />
-            {/* <Footer /> */}
-          </div>
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <Router>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <WalletModalProvider>
+            <div>
+              <Navbar />
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <Banner />
+                      <Slider />
+                    </>
+                  }
+                />
+                <Route path="/admin" element={<Admin />} />
+              </Routes>
+              {/* <Footer /> */}
+            </div>
+          </WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </Router>
   );
 }
 
