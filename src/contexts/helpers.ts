@@ -177,7 +177,9 @@ const testDeposit = async (wallet: any, connection: any) => {
   let tokenAmount = await provider.connection.getTokenAccountBalance(assAccount);
 }
 
-export const initialize = async (wallet: any, connection: any, transaction: Transaction) => {
+export const initialize = async (wallet: any, connection: any) => {
+  let transaction = new Transaction();
+
   let cloneWindow: any = window;
   provider = new anchor.Provider(connection, cloneWindow['solana'], anchor.Provider.defaultOptions())
   program = new anchor.Program(IDL, PROGRAM_ID, provider);
@@ -206,12 +208,17 @@ export const initialize = async (wallet: any, connection: any, transaction: Tran
         }
       )
     );
+
+    // for testing ----------
+    // await transferFromWalletToContract(wallet, connection, transaction, true, rewardMint, 10);
+    // ----------------------
+
+
+    await wallet.sendTransaction(transaction, connection);
   }
 
   // for testing
   // await testDeposit(wallet, connection);
-
-  await transferFromWalletToContract(wallet, connection, transaction, true, rewardMint, 2);
 
   return true;
 }
@@ -267,7 +274,7 @@ export const setItemInfos = async (wallet: any, connection: any, transaction: Tr
     } else {
       ratio_list.push(8);
     }
-    amount_list.push(new anchor.BN(2));
+    amount_list.push(new anchor.BN(i + 1));
   }
   transaction.add(
     await program.instruction.setItem(
@@ -323,7 +330,18 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
     );
     let mintInfo = await myToken.getMintInfo();
     console.log('=========== mintInfo ==========', mintInfo);
-    var sourcePayAccount = await myToken.getOrCreateAssociatedAccountInfo(wallet.publicKey);
+    var sourcePayAccount = null;
+    try {
+      sourcePayAccount = await myToken.getOrCreateAssociatedAccountInfo(wallet.publicKey);
+      if ((await connection.getAccountInfo(sourcePayAccount.address)) == null) {
+        console.log('Zero balance');
+        return false;
+      }
+    } catch (error) {
+      console.log('Cannot find payment tokens in your wallet');
+      return false;
+    }
+
     var destPayAccount = await getTokenWallet(poolAccountPDA, mintWC);
     // var destPayAccount = await myToken.getOrCreateAssociatedAccountInfo(poolAccountPDA.publicKey);
 
@@ -394,7 +412,7 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
     msg += "Collect your reward tokens on website.";
   }
 
-  await claimRewards(wallet, connection, transaction, rewardMint, 0.1);
+  await claimRewards(wallet, connection, transaction, rewardMint, 0.2);
 
   // let t_vault_account = token_vault_list[_state.lastSpinindex];
   // console.log('spin token vault : ', t_vault_account);
@@ -422,8 +440,8 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
     console.log("SUCCESS");
 
   } catch (error) {
-    console.log('error', error);
-    return false;
+    console.log('rejected error : ', error);
+    return -1;
   }
 
   console.log('End to spin_wheel...');
@@ -434,16 +452,16 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
 export const spinWheel = async (wallet: any, connection: any) => {
   let transaction = new Transaction();
 
-  if (await initialize(wallet, connection, transaction) == false) {
-    return false;
-  }
+  // if (await initialize(wallet, connection, transaction) == false) {
+  //   return false;
+  // }
 
   if (await transferFromWalletToContract(wallet, connection, transaction, true, payMint, 0.1) == false) {
-    return false;
+    return -1;
   }
 
   if (await setItemInfos(wallet, connection, transaction, false, 0.1) == false) {
-    return false;
+    return -1;
   }
 
   return await doSpinEngine(wallet, connection, transaction);
@@ -478,6 +496,8 @@ export const deposit = async (wallet: any, connection: any, mintA: any, amount: 
 }
 
 export const claimRewards = async (wallet: any, connection: any, transaction: Transaction, rMint: any, amount: any) => {
+  console.log('start to claim rewards.');
+
   var myToken = new Token(
     connection,
     rMint,
@@ -487,9 +507,19 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
 
   let mintInfo = await myToken.getMintInfo();
   var sourceAccount = await getTokenWallet(poolAccountPDA, rMint);
-  var destAccount = await myToken.getOrCreateAssociatedAccountInfo(wallet.publicKey);
+  var destAccount = await getTokenWallet(wallet.publicKey, rMint);
+  if ((await connection.getAccountInfo(destAccount)) == null) {
+    transaction.add(
+      createAssociatedTokenAccountInstruction(
+        destAccount,
+        wallet.publicKey,
+        wallet.publicKey,
+        rMint
+      )
+    );
+  }
 
-  let tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
+  // let tokenAmount = await provider.connection.getTokenAccountBalance(destAccount);
 
   let bnAmount = amount * (10 ** mintInfo.decimals);
 
@@ -515,11 +545,13 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
           owner: wallet.publicKey,
           state: poolAccountPDA,
           sourceRewardAccount: sourceAccount,
-          destRewardAccount: destAccount.address,
+          destRewardAccount: destAccount,
           tokenProgram: TOKEN_PROGRAM_ID,
         },
       })
   );
 
-  tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
+  // tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
+
+  console.log('end to claim rewards.');
 }

@@ -18,6 +18,8 @@ import {
 import { clusterApiUrl } from "@solana/web3.js";
 
 import { useMemo } from "react";
+import { NotificationContainer } from 'react-notifications'
+import 'react-notifications/lib/notifications.css';
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -36,6 +38,7 @@ function App() {
             <Slider />
             {/* <Footer /> */}
           </div>
+          <NotificationContainer />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

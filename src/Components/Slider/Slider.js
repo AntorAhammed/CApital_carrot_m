@@ -4,13 +4,14 @@ import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
-import { spinWheel, getItemInfos } from "../../contexts/helpers";
+import { spinWheel, getItemInfos, initialize } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
 import Modal from "react-modal";
 import { setTokenSourceMapRange } from "typescript";
 import Loader from "../Loader/Loader";
+import { NotificationManager } from 'react-notifications';
 
 const customStyles = {
   content: {
@@ -38,6 +39,9 @@ const Slider = (props) => {
     cssEase: "linear",
     afterChange: (e) => {
       setCurrentIndex(e);
+      setTimeout(() => {
+        openModal();
+      }, 100);
     },
     dots: false,
     infinite: true,
@@ -94,19 +98,21 @@ const Slider = (props) => {
 
   const [arraytoLoop, setarraytoLoop] = useState(SliderData);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [stopIndex, setStopIndex] = useState(10);
+  // const [stopIndex, setStopIndex] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
+  let stopIndex = 10;
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
-  // let stopIndex = 10;
 
   useEffect(async () => {
+    await initialize(wallet, connection);
+
     let sData = await getItemInfos(wallet);
     var repeatedData = null;
     if (sData) {
       let tmpData = [...arraytoLoop];
       for (let i = 0; i < sData.ratioList.length; i++) {
         tmpData[i].percent = sData.ratioList[i] + "%";
-        tmpData[i].price = "" + sData.amountList[i];
+        tmpData[i].price = "" + sData.amountList[i].toNumber();
       }
       repeatedData = ReturnRepeatedData(tmpData);
     } else {
@@ -129,7 +135,7 @@ const Slider = (props) => {
 
   function closeModal() {
     setIsOpen(false);
-    spinTheWheel();
+    // spinTheWheel();
   }
 
   const GetIndex = () => {
@@ -155,10 +161,22 @@ const Slider = (props) => {
 
   const OnClickSpin = async () => {
     setIsLoading(true);
+
     const itemIndex = await spinWheel(wallet, connection);
-    setStopIndex(itemIndex + 1);
-    setIsLoading(false);
-    openModal();
+    if (itemIndex == -1) {
+      // rejected & error
+      setIsLoading(false);
+
+      NotificationManager.error('Transaction error', "Please check your network and balanceof wallet", 3000);
+    } else {
+      console.log("item index result : ", itemIndex + 1);
+      // setStopIndex(itemIndex + 1);
+      stopIndex = itemIndex + 1;
+      setWinnerItem(arraytoLoop[itemIndex]);
+      setIsLoading(false);
+
+      spinTheWheel();
+    }
   };
 
   return (
