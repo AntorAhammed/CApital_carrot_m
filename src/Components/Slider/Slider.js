@@ -12,6 +12,7 @@ import Modal from "react-modal";
 import { setTokenSourceMapRange } from "typescript";
 import Loader from "../Loader/Loader";
 import { NotificationManager } from 'react-notifications';
+import * as anchor from '@project-serum/anchor';
 
 const customStyles = {
   content: {
@@ -25,6 +26,9 @@ const customStyles = {
 };
 
 Modal.setAppElement("#root");
+
+let stopIndex = 10;
+
 
 const Slider = (props) => {
   const sliderRef = useRef();
@@ -40,7 +44,10 @@ const Slider = (props) => {
     afterChange: (e) => {
       setCurrentIndex(e);
       setTimeout(() => {
-        openModal();
+        if (stopIndex != -1) {
+          openModal();
+          stopIndex = -1;
+        }
       }, 100);
     },
     dots: false,
@@ -98,28 +105,32 @@ const Slider = (props) => {
 
   const [arraytoLoop, setarraytoLoop] = useState(SliderData);
   const [currentIndex, setCurrentIndex] = useState(0);
-  // const [stopIndex, setStopIndex] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
-  let stopIndex = 10;
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
+  let isInitialized = false;
 
   useEffect(async () => {
-    await initialize(wallet, connection);
+    if (isInitialized == false) {
+      await initialize(wallet, connection);
 
-    let sData = await getItemInfos(wallet);
-    var repeatedData = null;
-    if (sData) {
-      let tmpData = [...arraytoLoop];
-      for (let i = 0; i < sData.ratioList.length; i++) {
-        tmpData[i].percent = sData.ratioList[i] + "%";
-        tmpData[i].price = "" + sData.amountList[i].toNumber();
+      let sData = await getItemInfos();
+      console.log('client item data', sData);
+      var repeatedData = null;
+      if (sData) {
+        let tmpData = [...arraytoLoop];
+        for (let i = 0; i < sData.ratioList.length; i++) {
+          tmpData[i].percent = sData.ratioList[i] + "%";
+          tmpData[i].price = "" + sData.amountList[i].toNumber();
+        }
+        repeatedData = ReturnRepeatedData(tmpData);
+      } else {
+        repeatedData = ReturnRepeatedData(arraytoLoop);
       }
-      repeatedData = ReturnRepeatedData(tmpData);
-    } else {
-      repeatedData = ReturnRepeatedData(arraytoLoop);
+      setarraytoLoop(repeatedData);
+
+      isInitialized = true;
     }
-    setarraytoLoop(repeatedData);
-  }, []);
+  }, [wallet]);
 
   let subtitle;
 
@@ -191,8 +202,8 @@ const Slider = (props) => {
           contentLabel="Example Modal"
         >
           <h2 ref={(_subtitle) => (subtitle = _subtitle)}>You've won</h2>
-          <h3>{winnerItem.price} </h3>
-          <img src={winnerItem.imgae} alt="" />
+          <h3>{winnerItem && winnerItem.price} </h3>
+          <img src={winnerItem && winnerItem.imgae} alt="" />
         </Modal>
       </div>
       <SliderJS {...config} ref={sliderRef}>

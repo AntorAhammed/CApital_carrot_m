@@ -11,6 +11,11 @@
           "isSigner": true
         },
         {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "state",
           "isMut": true,
           "isSigner": false
@@ -23,8 +28,41 @@
       ],
       "args": [
         {
-          "name": "poolBump",
+          "name": "bump",
           "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "addItem",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "itemMintList",
+          "type": {
+            "array": [
+              "publicKey",
+              10
+            ]
+          }
+        },
+        {
+          "name": "count",
+          "type": "u8"
+        },
+        {
+          "name": "ratio",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     },
@@ -32,68 +70,36 @@
       "name": "setItem",
       "accounts": [
         {
-          "name": "owner",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
           "name": "state",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "rand",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rent",
-          "isMut": false,
           "isSigner": false
         }
       ],
       "args": [
         {
-          "name": "tokenVaultBump",
+          "name": "index",
+          "type": "u8"
+        },
+        {
+          "name": "itemMintList",
+          "type": {
+            "array": [
+              "publicKey",
+              10
+            ]
+          }
+        },
+        {
+          "name": "count",
           "type": "u8"
         },
         {
           "name": "ratio",
-          "type": {
-            "array": [
-              "u8",
-              15
-            ]
-          }
+          "type": "u8"
         },
         {
           "name": "amount",
-          "type": {
-            "array": [
-              "u64",
-              15
-            ]
-          }
+          "type": "u64"
         }
       ]
     },
@@ -122,6 +128,11 @@
           "isSigner": false
         },
         {
+          "name": "pool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "sourceRewardAccount",
           "isMut": true,
           "isSigner": false
@@ -147,10 +158,37 @@
   ],
   "accounts": [
     {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "SpinItemList",
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "rewardMintList",
+            "type": {
+              "array": [
+                {
+                  "defined": "ItemRewardMints"
+                },
+                15
+              ]
+            }
+          },
           {
             "name": "ratioList",
             "type": {
@@ -172,12 +210,51 @@
           {
             "name": "lastSpinindex",
             "type": "u8"
+          },
+          {
+            "name": "count",
+            "type": "u8"
           }
         ]
       }
     }
   ],
+  "types": [
+    {
+      "name": "ItemRewardMints",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "itemMintList",
+            "type": {
+              "array": [
+                "publicKey",
+                10
+              ]
+            }
+          },
+          {
+            "name": "count",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "CountOverflowAddItem",
+      "msg": "Count Overflow To Add Item"
+    },
+    {
+      "code": 6001,
+      "name": "IndexOverflowSetItem",
+      "msg": "Index Overflow To Set Item"
+    }
+  ],
   "metadata": {
-    "address": "Cuw7DiTqrwe1vzuXUABq3sToxCXauMKT9UsniivXyruM"
+    "address": "F2McfaQBfmW6CKE9XV36fNHMdUzdg2pi9zvnSRyeBSuY"
   }
 }

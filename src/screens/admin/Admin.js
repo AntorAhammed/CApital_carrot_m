@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import "./admin.css";
+import { initialize, setAdminInfos } from "../../contexts/helpers";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { NotificationManager } from "react-notifications";
+
+
 function Admin() {
+  const { connection } = useConnection();
+  const wallet = useWallet();
+  const REWARD_TOKEN_COUNT_PER_ITEM = 10;
+
   const [rows, setRows] = useState([
     {
       price: "",
@@ -40,6 +49,44 @@ function Admin() {
       setRows(rowsTemp);
     }
   };
+
+  const onSetRows = async (e) => {
+    let itemInfos = [];
+    // for (let i = 0; i < rows.length; i++) {
+    //   let strAddrList = rows[i].walletAddress.split(',');
+    //   let addrCnt = strAddrList.length;
+    //   if (addrCnt > REWARD_TOKEN_COUNT_PER_ITEM) {
+    //     addrCnt = REWARD_TOKEN_COUNT_PER_ITEM;
+    //     let msgTitle = i + 1 + " item's token count is over flow";
+    //     let msgCont = "Max Token Count is " + REWARD_TOKEN_COUNT_PER_ITEM + ". ";
+    //     NotificationManager.warning(msgTitle, msgCont, 3000);
+    //   }
+    //   let tokenAddrList = [];
+    //   for (let k = 0; k < addrCnt; k++) {
+    //     let addr = strAddrList[k].trim();
+    //     tokenAddrList.push(addr);
+    //     console.log('token address : ', addr);
+    //   }
+    //   itemInfos.push({
+    //     tokenAddrList: tokenAddrList,
+    //     price: rows[i].type === "nft" ? 1 : rows[i].price,
+    //     winningPercentage: rows[i].winningPercentage,
+    //   });
+    // }
+
+    for (let i = 0; i < 15; i++) {
+      let tokenAddrList = ["FNY5Bb9bsYc2cJCrXt28WtjqgxFbEk5Gsc4cvHzUtHXd"];
+      itemInfos.push({
+        tokenAddrList: tokenAddrList,
+        price: i,
+        winningPercentage: i == 14 ? 2 : 7,
+      });
+    }
+
+    console.log('item infos : ', itemInfos);
+
+    setAdminInfos(wallet, connection, itemInfos);
+  }
 
   return (
     <div className="admin">
@@ -111,7 +158,7 @@ function Admin() {
       <hr />
       <button
         className="submit-btn custom-btn"
-        onClick={() => console.log(rows)}
+        onClick={onSetRows}
       >
         Submit
       </button>
