@@ -15,6 +15,9 @@ import {
 // for rest function
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, Token, MintLayout } from "@solana/spl-token";
 import * as anchor from '@project-serum/anchor';
+import * as borsh from 'borsh';
+import { METADATA_SCHEMA, Metadata } from './processMetaplexAccounts';
+
 
 const MAX_ITEM_COUNT = 15;
 
@@ -24,6 +27,11 @@ const PROGRAM_ID = new PublicKey(
   "6LyE69h6v9ZBfmXNcD5QX9qhxTB2JWwzCgQpzooYML6D"
 );
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
+
+const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
+  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+);
+
 
 let program: any = null;
 let provider: any = null;
@@ -258,10 +266,69 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
   return true;
 }
 
-export const getItemInfos = async () => {
+const getIdFromName = (name: string): number => {
+  //"WolfHero #11"
+  // "Seat #8"
+  let len = name.length;
+  let sharp = name.search('#');
+  return parseInt(name.substring(sharp + 1, len)) - 1;
+}
+
+
+const METADATA_REPLACE = new RegExp("\u0000", "g");
+function decodeMetadata(buffer: any) {
+  const metadata = borsh.deserializeUnchecked(
+    METADATA_SCHEMA,
+    Metadata,
+    buffer
+  );
+
+  metadata.data.name = metadata.data.name.replace(METADATA_REPLACE, "");
+  metadata.data.uri = metadata.data.uri.replace(METADATA_REPLACE, "");
+  metadata.data.symbol = metadata.data.symbol.replace(METADATA_REPLACE, "");
+  return metadata;
+}
+
+export const getNFTs = async (connection: any, nftAddr: PublicKey) => {
+  let nfts_metadata = await connection.getProgramAccounts(
+    TOKEN_METADATA_PROGRAM_ID,
+    {
+      filters: [
+        {
+          memcmp: {
+            offset: 33,
+            bytes: nftAddr.toBase58()
+          }
+        }
+      ]
+    }
+  )
+    .then(async (nfts: any) => {
+      console.log("Total NFT Count =", nfts.length);
+      let nft = nfts[0];
+      let nftAttr = decodeMetadata(nft.account.data);
+      console.log("nft Name =", nftAttr.data.name);
+      console.log("nft Id =", getIdFromName(nftAttr.data.name));
+      console.log('11111uuuuuuuuuuu11111111', nftAttr);
+      // let nft_record = new NFTRecord({
+      //   hero_id: getIdFromName(nftAttr.data.name),
+      //   content_uri: nftAttr.data.uri,
+      //   key_nft: new PublicKey(nftAttr.mint).toBase58(),
+      //   last_price: new BN(55).mul(new BN(10).pow(new BN(7))),
+      //   listed_price: new BN(100).mul(new BN(10).pow(new BN(7))),
+      // });
+      // await addNFT2Repo(nft_record, PROGRAM_ID, NFT_COUNT);
+    });
+
+  return nfts_metadata;
+}
+
+export const getItemInfos = async (connection: any) => {
   if (poolAccountPDA == false) {
     return null;
   }
+
+  await getNFTs(connection, new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT"));
 
   try {
     let _state = await program.account.spinItemList.fetch(

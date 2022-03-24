@@ -28,6 +28,7 @@ const customStyles = {
 Modal.setAppElement("#root");
 
 let stopIndex = 10;
+let isInitialized = false;
 
 
 const Slider = (props) => {
@@ -107,13 +108,12 @@ const Slider = (props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
-  let isInitialized = false;
 
   useEffect(async () => {
     if (isInitialized == false) {
       await initialize(wallet, connection);
 
-      let sData = await getItemInfos();
+      let sData = await getItemInfos(connection);
       console.log('client item data', sData);
       var repeatedData = null;
       if (sData) {
