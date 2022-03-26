@@ -23,5 +23,8 @@
   },
   "include": [
     "src"
-  ]
+  ],
+  "files": [
+    "src/declaration.d.ts"
+  ],
 }
