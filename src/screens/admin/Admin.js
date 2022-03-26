@@ -29,48 +29,51 @@ function Admin() {
     const asyncGetItemInfos = async () => {
       setLoaded(false);
 
-      await initialize(wallet, connection);
+      if (wallet.wallet) {
+        await initialize(wallet, connection);
 
-      let sData = null;
-      try {
-        sData = await getItemInfos(connection);
-      } catch (error) {
-        console.log('error to getItemInfos from admin', error);
-      }
-      console.log('tttttttttttttttt', sData);
+        let sData = null;
+        try {
+          sData = await getItemInfos(connection);
+        } catch (error) {
+          console.log('error to getItemInfos from admin', error);
+        }
 
-      let tmpRows = [];
-      if (sData) {
-        for (let i = 0; i < sData.ratioList.length; i++) {
-          let row = {
-            price: "" + sData.amountList[i].toNumber(),
-            winningPercentage: "" + sData.ratioList[i],
-            type: "nft",
-          };
+        let tmpRows = [];
+        if (sData) {
+          for (let i = 0; i < sData.ratioList.length; i++) {
+            let row = {
+              price: "" + sData.amountList[i].toNumber(),
+              winningPercentage: "" + sData.ratioList[i],
+              type: sData.tokenTypeList[i] == 1 ? "nft" : "token",
+            };
 
-          let tokenList = sData.rewardMintList[i];
-          let walletAddress = "";
-          for (let k = 0; k < tokenList.count; k++) {
-            walletAddress += tokenList.itemMintList[k].toBase58();
-            if (k != tokenList.count - 1) {
-              walletAddress += ",";
+            let tokenList = sData.rewardMintList[i];
+            let walletAddress = "";
+            for (let k = 0; k < tokenList.count; k++) {
+              walletAddress += tokenList.itemMintList[k].toBase58();
+              if (k != tokenList.count - 1) {
+                walletAddress += ",";
+              }
             }
+            row.walletAddress = walletAddress;
+            tmpRows.push(row);
           }
-          row.walletAddress = walletAddress;
-          tmpRows.push(row);
+          if (tmpRows.length != 0) {
+            setRows(tmpRows);
+          }
         }
-        if (tmpRows.length != 0) {
-          setRows(tmpRows);
-        }
+
+        setLoaded(true);
+        isInitialized = true;
       }
-      setLoaded(true);
-      isInitialized = true;
+
     }
 
     if (isInitialized == false) {
       asyncGetItemInfos();
     }
-  }, []);
+  }, [wallet]);
 
   const OnChange = (e, index) => {
     setRows((prev) =>
@@ -107,6 +110,7 @@ function Admin() {
 
   const onSetRows = async (e) => {
     let itemInfos = [];
+    let totalPercent = 0;
     for (let i = 0; i < rows.length; i++) {
       let strAddrList = rows[i].walletAddress.split(',');
       let addrCnt = strAddrList.length;
@@ -120,25 +124,30 @@ function Admin() {
       for (let k = 0; k < addrCnt; k++) {
         let addr = strAddrList[k].trim();
         tokenAddrList.push(addr);
-        console.log('token address : ', addr);
       }
       itemInfos.push({
         tokenAddrList: tokenAddrList,
-        price: rows[i].type === "nft" ? 1 : rows[i].price,
+        tokenType: rows[i].type == "nft" ? 1 : 0,
+        price: rows[i].price,
         winningPercentage: rows[i].winningPercentage,
       });
+
+      totalPercent += rows[i].winningPercentage;
     }
 
-    // for (let i = 0; i < MAX_ITEM_COUNT; i++) {
-    //   let tokenAddrList = ["FNY5Bb9bsYc2cJCrXt28WtjqgxFbEk5Gsc4cvHzUtHXd"];
+    if (totalPercent != 100) {
+      NotificationManager.error("Total percentage must be 100", 3000);
+      return;
+    }
+
+    // for (let i = 0; i < 15; i++) {
     //   itemInfos.push({
-    //     tokenAddrList: tokenAddrList,
+    //     tokenAddrList: ['FNY5Bb9bsYc2cJCrXt28WtjqgxFbEk5Gsc4cvHzUtHXd'],
+    //     tokenType: 1,
     //     price: i,
     //     winningPercentage: i == 14 ? 2 : 7,
     //   });
     // }
-
-    console.log('item infos : ', itemInfos);
 
     setAdminInfos(wallet, connection, itemInfos);
   }
@@ -164,6 +173,7 @@ function Admin() {
                     className="custom-input"
                     onChange={(e) => OnChange(e, index)}
                     name="type"
+                    value={row.type}
                   >
                     <option selected value="nft">
                       NFT

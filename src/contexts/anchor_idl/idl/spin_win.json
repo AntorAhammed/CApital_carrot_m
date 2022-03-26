@@ -57,6 +57,10 @@
           "type": "u8"
         },
         {
+          "name": "tokenType",
+          "type": "u8"
+        },
+        {
           "name": "ratio",
           "type": "u8"
         },
@@ -91,6 +95,10 @@
         },
         {
           "name": "count",
+          "type": "u8"
+        },
+        {
+          "name": "tokenType",
           "type": "u8"
         },
         {
@@ -190,6 +198,15 @@
             }
           },
           {
+            "name": "tokenTypeList",
+            "type": {
+              "array": [
+                "u8",
+                15
+              ]
+            }
+          },
+          {
             "name": "ratioList",
             "type": {
               "array": [
@@ -255,6 +272,6 @@
     }
   ],
   "metadata": {
-    "address": "F2McfaQBfmW6CKE9XV36fNHMdUzdg2pi9zvnSRyeBSuY"
+    "address": "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
   }
 }

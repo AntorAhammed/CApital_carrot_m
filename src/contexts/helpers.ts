@@ -24,7 +24,7 @@ const MAX_ITEM_COUNT = 15;
 const IDL = require('./anchor_idl/idl/spin_win');
 
 const PROGRAM_ID = new PublicKey(
-  "6LyE69h6v9ZBfmXNcD5QX9qhxTB2JWwzCgQpzooYML6D"
+  "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
@@ -163,7 +163,7 @@ export const initialize = async (wallet: any, connection: any) => {
 
   let poolAccountSeed = "spin-wheel-pool";
   poolAccountPDA = await PublicKey.createWithSeed(
-    initAdminKey, // wallet.publicKey,
+    initAdminKey, // 
     poolAccountSeed,
     program.programId,
   );
@@ -173,13 +173,14 @@ export const initialize = async (wallet: any, connection: any) => {
 
     let transaction = new Transaction();
 
+    let POOL_SPACE = 4975;
     transaction.add(SystemProgram.createAccountWithSeed({
       fromPubkey: wallet.publicKey,
       basePubkey: wallet.publicKey,
       seed: poolAccountSeed,
       newAccountPubkey: poolAccountPDA,
-      lamports: await provider.connection.getMinimumBalanceForRentExemption(4960),
-      space: 4960,
+      lamports: await provider.connection.getMinimumBalanceForRentExemption(POOL_SPACE),
+      space: POOL_SPACE,
       programId: program.programId,
     }));
 
@@ -191,7 +192,7 @@ export const initialize = async (wallet: any, connection: any) => {
             initializer: wallet.publicKey,
             pool: poolVaultPDA,
             state: poolAccountPDA,
-            systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: SystemProgram.programId,
           },
         }
       )
@@ -216,15 +217,18 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
   console.log('Start to Set Item...');
 
   let token_addr_list = [];
+  let token_type_list = [];
   let ratio_list = [];
   let amount_list = [];
   for (let i = 0; i < MAX_ITEM_COUNT; i++) {
     if (i < itemInfos.length) {
       token_addr_list.push(convertToPubKey(itemInfos[i]["tokenAddrList"]));
+      token_type_list.push(Number(itemInfos[i]["tokenType"]));
       ratio_list.push(Number(itemInfos[i]["winningPercentage"]));
       amount_list.push(new anchor.BN(itemInfos[i]["price"]));
     } else {
       token_addr_list.push([]);
+      token_type_list.push(0);
       ratio_list.push(0);
       amount_list.push(new anchor.BN(0));
     }
@@ -234,9 +238,9 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
   console.log('ratios', ratio_list);
   console.log('amounts', amount_list);
 
-  for (let i = 0; i < MAX_ITEM_COUNT; i += 3) {
+  for (let i = 0; i < MAX_ITEM_COUNT; i += 2) {
     let transaction = new Transaction();
-    for (let k = 0; k < 3; k++) {
+    for (let k = 0; k < 2; k++) {
       let item_idx = i + k;
       if (item_idx >= MAX_ITEM_COUNT) {
         break;
@@ -247,6 +251,7 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
           item_idx,
           token_addr_list[item_idx],
           token_addr_list[item_idx].length,
+          token_type_list[item_idx],
           ratio_list[item_idx],
           amount_list[item_idx],
           {
@@ -290,45 +295,32 @@ function decodeMetadata(buffer: any) {
 }
 
 export const getNFTs = async (connection: any, nftAddr: PublicKey) => {
-  let nfts_metadata = await connection.getProgramAccounts(
-    TOKEN_METADATA_PROGRAM_ID,
-    {
-      filters: [
-        {
-          memcmp: {
-            offset: 33,
-            bytes: nftAddr.toBase58()
-          }
-        }
-      ]
-    }
-  )
-    .then(async (nfts: any) => {
-      console.log("Total NFT Count =", nfts.length);
-      let nft = nfts[0];
-      let nftAttr = decodeMetadata(nft.account.data);
-      console.log("nft Name =", nftAttr.data.name);
-      console.log("nft Id =", getIdFromName(nftAttr.data.name));
-      console.log('11111uuuuuuuuuuu11111111', nftAttr);
-      // let nft_record = new NFTRecord({
-      //   hero_id: getIdFromName(nftAttr.data.name),
-      //   content_uri: nftAttr.data.uri,
-      //   key_nft: new PublicKey(nftAttr.mint).toBase58(),
-      //   last_price: new BN(55).mul(new BN(10).pow(new BN(7))),
-      //   listed_price: new BN(100).mul(new BN(10).pow(new BN(7))),
-      // });
-      // await addNFT2Repo(nft_record, PROGRAM_ID, NFT_COUNT);
-    });
 
-  return nfts_metadata;
+  const metadataAccount = (
+    await PublicKey.findProgramAddress(
+      [
+        Buffer.from('metadata'),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        nftAddr.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID,
+    )
+  )[0];
+
+  let accInfo = await connection.getAccountInfo(metadataAccount);
+
+  let nftAttr = decodeMetadata(accInfo.data);
+  console.log("nft Name =", nftAttr.data.name);
+  console.log("nft Id =", getIdFromName(nftAttr.data.name));
+  console.log('nftAttr Data', nftAttr);
+
+  return nftAttr.data;
 }
 
 export const getItemInfos = async (connection: any) => {
   if (poolAccountPDA == false) {
     return null;
   }
-
-  await getNFTs(connection, new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT"));
 
   try {
     let _state = await program.account.spinItemList.fetch(

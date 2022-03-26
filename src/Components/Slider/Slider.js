@@ -4,7 +4,7 @@ import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
-import { spinWheel, getItemInfos, initialize } from "../../contexts/helpers";
+import { spinWheel, getItemInfos, initialize, getNFTs } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
@@ -13,6 +13,9 @@ import { setTokenSourceMapRange } from "typescript";
 import Loader from "../Loader/Loader";
 import { NotificationManager } from 'react-notifications';
 import * as anchor from '@project-serum/anchor';
+import { PublicKey } from "@solana/web3.js";
+import axios from 'axios';
+
 
 const customStyles = {
   content: {
@@ -27,7 +30,7 @@ const customStyles = {
 
 Modal.setAppElement("#root");
 
-let stopIndex = 10;
+let stopIndex = -1;//10;
 let isInitialized = false;
 
 
@@ -38,7 +41,7 @@ const Slider = (props) => {
     className: "center",
     infinite: true,
     centerMode: true,
-    speed: 2500,
+    speed: 300,
     // rtl: true,
     slidesToShow: 3,
     cssEase: "linear",
@@ -109,8 +112,27 @@ const Slider = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
 
+  const tokenImageUrl = async (tokenMint, tokenType) => {
+    if (tokenType == 1) {
+      let metaData = await getNFTs(connection, new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT"));
+      let res = await axios.get(metaData.uri);
+      if (res.data && res.data.image) {
+        return res.data.image;
+      }
+      return "";
+    } else {
+      let addrStr = "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW";// tokenMint.toBase58();
+      let apiurl = "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
+      let res = await axios.get(apiurl);
+      if (res.data && res.data.icon) {
+        return res.data.icon;
+      }
+    }
+  }
+
   useEffect(async () => {
-    if (isInitialized == false) {
+    if (wallet.wallet && isInitialized == false && isLoading == false) {
+      setIsLoading(true);
       await initialize(wallet, connection);
 
       let sData = await getItemInfos(connection);
@@ -119,6 +141,7 @@ const Slider = (props) => {
       if (sData) {
         let tmpData = [...arraytoLoop];
         for (let i = 0; i < sData.ratioList.length; i++) {
+          tmpData[i].imgae = await tokenImageUrl(sData.rewardMintList[i].itemMintList[0], sData.tokenTypeList[i]);
           tmpData[i].percent = sData.ratioList[i] + "%";
           tmpData[i].price = "" + sData.amountList[i].toNumber();
         }
@@ -129,6 +152,7 @@ const Slider = (props) => {
       setarraytoLoop(repeatedData);
 
       isInitialized = true;
+      setIsLoading(false);
     }
   }, [wallet]);
 
