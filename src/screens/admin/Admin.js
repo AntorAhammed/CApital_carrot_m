@@ -7,7 +7,6 @@ import { getItemInfos } from "../../contexts/helpers";
 
 let isInitialized = false;
 
-
 function Admin() {
   const { connection } = useConnection();
   const wallet = useWallet();
@@ -36,7 +35,7 @@ function Admin() {
         try {
           sData = await getItemInfos(connection);
         } catch (error) {
-          console.log('error to getItemInfos from admin', error);
+          console.log("error to getItemInfos from admin", error);
         }
 
         let tmpRows = [];
@@ -67,8 +66,7 @@ function Admin() {
         setLoaded(true);
         isInitialized = true;
       }
-
-    }
+    };
 
     if (isInitialized == false) {
       asyncGetItemInfos();
@@ -96,7 +94,7 @@ function Admin() {
         },
       ]);
     } else {
-      NotificationManager.warning('max count is 15.');
+      NotificationManager.warning("max count is 15.");
     }
   };
 
@@ -112,12 +110,13 @@ function Admin() {
     let itemInfos = [];
     let totalPercent = 0;
     for (let i = 0; i < rows.length; i++) {
-      let strAddrList = rows[i].walletAddress.split(',');
+      let strAddrList = rows[i].walletAddress.split(",");
       let addrCnt = strAddrList.length;
       if (addrCnt > REWARD_TOKEN_COUNT_PER_ITEM) {
         addrCnt = REWARD_TOKEN_COUNT_PER_ITEM;
         let msgTitle = i + 1 + " item's token count is over flow";
-        let msgCont = "Max Token Count is " + REWARD_TOKEN_COUNT_PER_ITEM + ". ";
+        let msgCont =
+          "Max Token Count is " + REWARD_TOKEN_COUNT_PER_ITEM + ". ";
         NotificationManager.warning(msgTitle, msgCont, 3000);
       }
       let tokenAddrList = [];
@@ -150,11 +149,13 @@ function Admin() {
     // }
 
     setAdminInfos(wallet, connection, itemInfos);
-  }
+  };
 
   return !isLoaded ? (
-    <div><h1>Loading...</h1></div>) :
-    (
+    <div>
+      <h1>Loading...</h1>
+    </div>
+  ) : (
     <div className="admin">
       <div className="admin-header">
         <button className="custom-btn add-btn" onClick={AddRow}>
@@ -226,10 +227,7 @@ function Admin() {
         })}
 
       <hr />
-      <button
-        className="submit-btn custom-btn"
-        onClick={onSetRows}
-      >
+      <button className="submit-btn custom-btn" onClick={onSetRows}>
         Submit
       </button>
     </div>
