@@ -112,12 +112,13 @@ const Slider = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
 
-  const tokenImageUrl = async (tokenMint, tokenType) => {
+  const tokenSymbolImage = async (tokenMint, tokenType) => {
     if (tokenType == 1) {
       let metaData = await getNFTs(connection, new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT"));
       let res = await axios.get(metaData.uri);
       if (res.data && res.data.image) {
-        return res.data.image;
+        console.log('2222222222222', res.data)
+        return { symbol: res.data.symbol, image: res.data.image };
       }
       return "";
     } else {
@@ -125,7 +126,8 @@ const Slider = (props) => {
       let apiurl = "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
       let res = await axios.get(apiurl);
       if (res.data && res.data.icon) {
-        return res.data.icon;
+        console.log('111111111111', res.data)
+        return { symbol: res.data.symbol, image: res.data.icon };
       }
     }
   }
@@ -141,7 +143,9 @@ const Slider = (props) => {
       if (sData) {
         let tmpData = [...arraytoLoop];
         for (let i = 0; i < sData.ratioList.length; i++) {
-          tmpData[i].imgae = await tokenImageUrl(sData.rewardMintList[i].itemMintList[0], sData.tokenTypeList[i]);
+          let symbolImage = await tokenSymbolImage(sData.rewardMintList[i].itemMintList[0], sData.tokenTypeList[i]);
+          tmpData[i].symbol = symbolImage.symbol;
+          tmpData[i].image = symbolImage.image;
           tmpData[i].percent = sData.ratioList[i] + "%";
           tmpData[i].price = "" + sData.amountList[i].toNumber();
         }
@@ -227,7 +231,7 @@ const Slider = (props) => {
         >
           <h2 ref={(_subtitle) => (subtitle = _subtitle)}>You've won</h2>
           <h3>{winnerItem && winnerItem.price} </h3>
-          <img src={winnerItem && winnerItem.imgae} alt="" />
+          <img src={winnerItem && winnerItem.image} alt="" />
         </Modal>
       </div>
       <SliderJS {...config} ref={sliderRef}>
@@ -241,11 +245,11 @@ const Slider = (props) => {
                     <div className="percent">{val.percent}</div>
                     <div className="desc">{val.desc}</div>
                   </div>
-                  <img className="slider_img" src={val.imgae} alt="" />
+                  <img className="slider_img" src={val.image} alt="" />
                   <div className="price">
                     <p>
                       {val.price}
-                      <sup>USDC</sup>
+                      <sup>{val.symbol}</sup>
                     </p>
                   </div>
                 </div>
