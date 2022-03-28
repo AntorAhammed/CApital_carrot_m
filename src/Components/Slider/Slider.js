@@ -212,6 +212,11 @@ const Slider = (props) => {
     setIsLoading(true);
     audioPlayerRef.audioEl.current.play();
 
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return;
     const itemIndex = await spinWheel(wallet, connection);
     if (itemIndex == -1) {
       // rejected & error
@@ -276,7 +281,7 @@ const Slider = (props) => {
         ref={(el) => {
           audioPlayerRef = el;
         }}
-        src={isLoading ? Running : Stopped}
+        src={Running}
         loop={isLoading}
       />
 
