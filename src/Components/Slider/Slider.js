@@ -4,19 +4,25 @@ import "slick-carousel/slick/slick-theme.css";
 import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
-import { spinWheel, getItemInfos, initialize, getNFTs } from "../../contexts/helpers";
+import {
+  spinWheel,
+  getItemInfos,
+  initialize,
+  getNFTs,
+} from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
 
 import Modal from "react-modal";
 import { setTokenSourceMapRange } from "typescript";
 import Loader from "../Loader/Loader";
-import { NotificationManager } from 'react-notifications';
-import * as anchor from '@project-serum/anchor';
+import { NotificationManager } from "react-notifications";
+import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import axios from 'axios';
-
-
+import axios from "axios";
+import ReactAudioPlayer from "react-audio-player";
+import Running from "../../assets/running.mpeg";
+import Stopped from "../../assets/open.mpeg";
 const customStyles = {
   content: {
     top: "50%",
@@ -30,12 +36,12 @@ const customStyles = {
 
 Modal.setAppElement("#root");
 
-let stopIndex = -1;//10;
+let stopIndex = -1; //10;
 let isInitialized = false;
-
 
 const Slider = (props) => {
   const sliderRef = useRef();
+  var audioPlayerRef = useRef();
 
   const config = {
     className: "center",
@@ -114,21 +120,25 @@ const Slider = (props) => {
 
   const tokenImageUrl = async (tokenMint, tokenType) => {
     if (tokenType == 1) {
-      let metaData = await getNFTs(connection, new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT"));
+      let metaData = await getNFTs(
+        connection,
+        new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT")
+      );
       let res = await axios.get(metaData.uri);
       if (res.data && res.data.image) {
         return res.data.image;
       }
       return "";
     } else {
-      let addrStr = "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW";// tokenMint.toBase58();
-      let apiurl = "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
+      let addrStr = "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW"; // tokenMint.toBase58();
+      let apiurl =
+        "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
       let res = await axios.get(apiurl);
       if (res.data && res.data.icon) {
         return res.data.icon;
       }
     }
-  }
+  };
 
   useEffect(async () => {
     if (wallet.wallet && isInitialized == false && isLoading == false) {
@@ -136,12 +146,15 @@ const Slider = (props) => {
       await initialize(wallet, connection);
 
       let sData = await getItemInfos(connection);
-      console.log('client item data', sData);
+      console.log("client item data", sData);
       var repeatedData = null;
       if (sData) {
         let tmpData = [...arraytoLoop];
         for (let i = 0; i < sData.ratioList.length; i++) {
-          tmpData[i].imgae = await tokenImageUrl(sData.rewardMintList[i].itemMintList[0], sData.tokenTypeList[i]);
+          tmpData[i].imgae = await tokenImageUrl(
+            sData.rewardMintList[i].itemMintList[0],
+            sData.tokenTypeList[i]
+          );
           tmpData[i].percent = sData.ratioList[i] + "%";
           tmpData[i].price = "" + sData.amountList[i].toNumber();
         }
@@ -192,17 +205,23 @@ const Slider = (props) => {
     var pauseIndex = GetIndex();
     setCurrentIndex(pauseIndex);
     sliderRef.current.slickGoTo(pauseIndex, false);
+    audioPlayerRef.audioEl.current.pause();
   };
 
   const OnClickSpin = async () => {
     setIsLoading(true);
+    audioPlayerRef.audioEl.current.play();
 
     const itemIndex = await spinWheel(wallet, connection);
     if (itemIndex == -1) {
       // rejected & error
       setIsLoading(false);
 
-      NotificationManager.error('Transaction error', "Please check your network and balanceof wallet", 3000);
+      NotificationManager.error(
+        "Transaction error",
+        "Please check your network and balanceof wallet",
+        3000
+      );
     } else {
       console.log("item index result : ", itemIndex + 1);
       // setStopIndex(itemIndex + 1);
@@ -253,6 +272,14 @@ const Slider = (props) => {
             );
           })}
       </SliderJS>
+      <ReactAudioPlayer
+        ref={(el) => {
+          audioPlayerRef = el;
+        }}
+        src={isLoading ? Running : Stopped}
+        loop={isLoading}
+      />
+
       <div className="detail">
         {/* <p onClick={spinTheWheel}>Try for free</p> */}
         <button onClick={OnClickSpin}>Open Box</button>
