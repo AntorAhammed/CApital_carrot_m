@@ -117,6 +117,7 @@ const Slider = (props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [winnerItem, setWinnerItem] = useState(arraytoLoop[stopIndex]);
+  const [adminInitFlag, setAdminInitFlag] = useState(true);
 
   const tokenSymbolImage = async (tokenMint, tokenType) => {
     if (tokenType == 1) {
@@ -126,7 +127,6 @@ const Slider = (props) => {
       );
       let res = await axios.get(metaData.uri);
       if (res.data && res.data.image) {
-        console.log('2222222222222', res.data)
         return { symbol: res.data.symbol, image: res.data.image };
       }
       return "";
@@ -143,9 +143,14 @@ const Slider = (props) => {
   };
 
   useEffect(async () => {
-    if (wallet.wallet && isInitialized == false && isLoading == false) {
+    if (wallet.wallet && wallet.publicKey && isInitialized == false && isLoading == false) {
       setIsLoading(true);
-      await initialize(wallet, connection);
+      if (await initialize(wallet, connection, true) == false) {
+        // NotificationManager.error("Admin is not initialize")
+        setIsLoading(false);
+        setAdminInitFlag(false);
+        return;
+      }
 
       let sData = await getItemInfos(connection);
       console.log("client item data", sData);
@@ -209,16 +214,11 @@ const Slider = (props) => {
     audioPlayerRef.audioEl.current.pause();
   };
 
-  const OnClickSpin = async () => {
+  const OnClickSpin = async (paySol) => {
     setIsLoading(true);
     audioPlayerRef.audioEl.current.play();
 
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-
-    return;
-    const itemIndex = await spinWheel(wallet, connection);
+    const itemIndex = await spinWheel(wallet, connection, paySol);
     if (itemIndex == -1) {
       // rejected & error
       setIsLoading(false);
@@ -241,6 +241,16 @@ const Slider = (props) => {
 
   return (
     <div className="container" style={{ marginTop: "50px" }}>
+      {!adminInitFlag &&
+        <div>
+          <Modal
+            isOpen={true}
+            style={customStyles}
+            contentLabel="Admin Init Confirm"
+          >
+            <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Admin didn't initialize.</h2>
+          </Modal>
+        </div>}
       {isLoading && <Loader />}
       <div>
         <Modal
@@ -288,7 +298,8 @@ const Slider = (props) => {
 
       <div className="detail">
         {/* <p onClick={spinTheWheel}>Try for free</p> */}
-        <button onClick={OnClickSpin}>Open Box</button>
+        <button onClick={() => OnClickSpin(true)}>Open Box(1 SOL)</button>
+        <button onClick={() => OnClickSpin(false)}>Open Box(1.5 Token)</button>
       </div>
     </div>
   );

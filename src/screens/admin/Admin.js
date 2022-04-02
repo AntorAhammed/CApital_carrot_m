@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./admin.css";
-import { initialize, setAdminInfos } from "../../contexts/helpers";
+import { initialize, setAdminInfos, isAdminWallet } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { NotificationManager } from "react-notifications";
 import { getItemInfos } from "../../contexts/helpers";
@@ -12,6 +12,8 @@ function Admin() {
   const wallet = useWallet();
   const REWARD_TOKEN_COUNT_PER_ITEM = 10;
   const MAX_ITEM_COUNT = 15;
+
+  const [isAdmin, setAdmin] = useState(0);  // 0 : non-decided, 1 : admin, 2 : client
 
   const [isLoaded, setLoaded] = useState(false);
 
@@ -29,7 +31,14 @@ function Admin() {
       setLoaded(false);
 
       if (wallet.wallet) {
-        await initialize(wallet, connection);
+        if (isAdminWallet(wallet)) {
+          setAdmin(1);
+        } else {
+          setAdmin(2);
+          return;
+        }
+
+        await initialize(wallet, connection, false);
 
         let sData = null;
         try {
@@ -151,7 +160,7 @@ function Admin() {
     setAdminInfos(wallet, connection, itemInfos);
   };
 
-  return !isLoaded ? (
+  return isAdmin != 1 ? (<h1>No Admin</h1>) : !isLoaded ? (
     <div>
       <h1>Loading...</h1>
     </div>

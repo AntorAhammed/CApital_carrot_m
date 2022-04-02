@@ -23,35 +23,44 @@ const MAX_ITEM_COUNT = 15;
 
 const IDL = require('./anchor_idl/idl/spin_win');
 
+// const PROGRAM_ID = new PublicKey(
+//   "LooKuWh3RRuAquRa4g127Nxf3TgSg7inodm6FY9rb2H"
+// );
+// devnet
 const PROGRAM_ID = new PublicKey(
   "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
-const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
+const initAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+// // devnet
+// const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
+const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
+const payMint = new PublicKey(PAY_TOKEN);
+
+const PAY_AMOUNT_TOKEN = 1;
+const PAY_AMOUNT_SOL = 0.5;
 
 let program: any = null;
 let provider: any = null;
 let poolAccountPDA: any = null;
 let poolVaultPDA: any = null;
 
-// pool associated account for pay : FPVK44CD6Asb951kUinP9DxopwgWEhopPtZm7oq1hpsZ
-// pool associated account for reward : 9K1tmvtnvU45eFA7Lvey1C6S6dF4p1MGA63GTsQo8Eqq
-
-// pay account : 6BGK3LfHHc5tzVo6ixKPba8f16fNZCckX1ZQZhJJ8NtT
-const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
-const payMint = new PublicKey(PAY_TOKEN);
-
-const REWARD_TOKEN = 'FNY5Bb9bsYc2cJCrXt28WtjqgxFbEk5Gsc4cvHzUtHXd';
-const rewardMint = new PublicKey(REWARD_TOKEN);
-
 // test
 let mintA: Token;
 const mintAuthority = anchor.web3.Keypair.generate();
 const payer = anchor.web3.Keypair.generate();
+
+export const isAdminWallet = (wallet: any) => {
+  if (!wallet.publicKey) {
+    return false;
+  }
+
+  return wallet.publicKey.equals(initAdminKey);
+}
 
 const createAssociatedTokenAccountInstruction = (
   associatedTokenAddress: anchor.web3.PublicKey,
@@ -146,7 +155,7 @@ const testDeposit = async (wallet: any, connection: any) => {
   let tokenAmount = await provider.connection.getTokenAccountBalance(assAccount);
 }
 
-export const initialize = async (wallet: any, connection: any) => {
+export const initialize = async (wallet: any, connection: any, checkAdminInit: any) => {
   let cloneWindow: any = window;
   provider = new anchor.Provider(connection, cloneWindow['solana'], anchor.Provider.defaultOptions())
   program = new anchor.Program(IDL, PROGRAM_ID, provider);
@@ -169,7 +178,10 @@ export const initialize = async (wallet: any, connection: any) => {
   );
 
   if ((await connection.getAccountInfo(poolAccountPDA)) == null) {
-    console.log('initialize start...');
+    console.log('initialize start...', wallet);
+    if (checkAdminInit) {
+      return false;
+    }
 
     let transaction = new Transaction();
 
@@ -335,10 +347,13 @@ export const getItemInfos = async (connection: any) => {
 }
 
 
-export const transferFromWalletToContract = async (wallet: any, connection: any, transaction: Transaction, payMethodToken: any, mintWC: any, payAmount: any) => {
+export const transferFromWalletToContract = async (wallet: any, connection: any, transaction: Transaction, paySol: any, mintWC: any) => {
   console.log('Start to transfer from wallet to contract...');
 
-  if (payMethodToken) {
+  let payAmountToken = PAY_AMOUNT_TOKEN; // token amount
+  let payAmountSol = PAY_AMOUNT_SOL; // sol amount
+
+  if (paySol == false) {
     var myToken = new Token(
       connection,
       mintWC,
@@ -374,9 +389,9 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
     }
 
     let srcAmount = await provider.connection.getTokenAccountBalance(sourcePayAccount.address);
-    console.log('pay balances : ', srcAmount, payAmount * (10 ** mintInfo.decimals));
-    if (srcAmount < payAmount) {
-      console.log('Infucient balance : ', srcAmount, payAmount);
+    console.log('pay balances : ', srcAmount, payAmountToken * (10 ** mintInfo.decimals));
+    if (srcAmount < payAmountToken) {
+      console.log('Infucient balance : ', srcAmount, payAmountToken);
       return false;
     }
 
@@ -387,7 +402,7 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
         destPayAccount,
         wallet.publicKey,
         [],
-        payAmount * (10 ** mintInfo.decimals),
+        payAmountToken * (10 ** mintInfo.decimals),
       )
     );
   } else {
@@ -395,7 +410,7 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
         toPubkey: poolAccountPDA,
-        lamports: (payAmount * web3.LAMPORTS_PER_SOL),
+        lamports: (payAmountSol * web3.LAMPORTS_PER_SOL),
       })
     );
   }
@@ -457,17 +472,16 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
   return _state.lastSpinindex;
 }
 
-export const spinWheel = async (wallet: any, connection: any) => {
+export const spinWheel = async (wallet: any, connection: any, paySol: any) => {
   let transaction = new Transaction();
 
   // if (await initialize(wallet, connection, transaction) == false) {
   //   return false;
   // }
 
-  if (await transferFromWalletToContract(wallet, connection, transaction, true, payMint, 0.1) == false) {
+  if (await transferFromWalletToContract(wallet, connection, transaction, paySol, payMint) == false) {
     return -1;
   }
-
 
   return await doSpinEngine(wallet, connection, transaction);
 }
@@ -554,7 +568,7 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
 export const setAdminInfos = async (wallet: any, connection: any, itemInfos: []) => {
   console.log('start admin');
   try {
-    await initialize(wallet, connection);
+    await initialize(wallet, connection, false);
   } catch (error) {
     console.log('admin initialize error', error);
     return false;
