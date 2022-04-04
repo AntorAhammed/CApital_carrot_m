@@ -44,6 +44,8 @@ const payMint = new PublicKey(PAY_TOKEN);
 const PAY_AMOUNT_TOKEN = 1;
 const PAY_AMOUNT_SOL = 0.5;
 
+export const REWARD_TOKEN_DECIMAL = 9;
+
 let program: any = null;
 let provider: any = null;
 let poolAccountPDA: any = null;
@@ -172,7 +174,7 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
 
   let poolAccountSeed = "spin-wheel-pool";
   poolAccountPDA = await PublicKey.createWithSeed(
-    initAdminKey, // 
+    initAdminKey, //initAdminKey, // 
     poolAccountSeed,
     program.programId,
   );
@@ -188,7 +190,7 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
     let POOL_SPACE = 4975;
     transaction.add(SystemProgram.createAccountWithSeed({
       fromPubkey: wallet.publicKey,
-      basePubkey: wallet.publicKey,
+      basePubkey: initAdminKey,
       seed: poolAccountSeed,
       newAccountPubkey: poolAccountPDA,
       lamports: await provider.connection.getMinimumBalanceForRentExemption(POOL_SPACE),
@@ -237,7 +239,7 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
       token_addr_list.push(convertToPubKey(itemInfos[i]["tokenAddrList"]));
       token_type_list.push(Number(itemInfos[i]["tokenType"]));
       ratio_list.push(Number(itemInfos[i]["winningPercentage"]));
-      amount_list.push(new anchor.BN(itemInfos[i]["price"]));
+      amount_list.push(new anchor.BN(itemInfos[i]["price"] * (10 ** REWARD_TOKEN_DECIMAL)));
     } else {
       token_addr_list.push([]);
       token_type_list.push(0);
@@ -451,7 +453,7 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
 
   console.log('pool data', _state);
   let rMintList = _state.rewardMintList[_state.lastSpinindex];
-  let amount = _state.amountList[_state.lastSpinindex].toNumber();
+  let amount = _state.amountList[_state.lastSpinindex].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
   // console.log('reward mint list', rMintList);
 
   for (let i = 0; i < rMintList.count; i++) {
