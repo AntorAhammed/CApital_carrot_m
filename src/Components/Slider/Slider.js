@@ -9,6 +9,7 @@ import {
   getItemInfos,
   initialize,
   getNFTs,
+  REWARD_TOKEN_DECIMAL
 } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
@@ -162,7 +163,7 @@ const Slider = (props) => {
           tmpData[i].symbol = symbolImage.symbol;
           tmpData[i].image = symbolImage.image;
           tmpData[i].percent = sData.ratioList[i] + "%";
-          tmpData[i].price = "" + sData.amountList[i].toNumber();
+          tmpData[i].price = "" + sData.amountList[i].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
         }
         repeatedData = ReturnRepeatedData(tmpData);
       } else {

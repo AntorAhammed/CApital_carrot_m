@@ -30,9 +30,9 @@ const IDL = require('./anchor_idl/idl/spin_win');
 const PROGRAM_ID = new PublicKey(
   "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
-const initAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 // // devnet
-// const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
+const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
@@ -61,7 +61,7 @@ export const isAdminWallet = (wallet: any) => {
     return false;
   }
 
-  return wallet.publicKey.equals(initAdminKey);
+  return wallet.publicKey.equals(realAdminKey);
 }
 
 const createAssociatedTokenAccountInstruction = (
