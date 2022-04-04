@@ -217,7 +217,6 @@ const Slider = (props) => {
 
   const OnClickSpin = async (paySol) => {
     setIsLoading(true);
-    audioPlayerRef.audioEl.current.play();
 
     const itemIndex = await spinWheel(wallet, connection, paySol);
     if (itemIndex == -1) {
@@ -230,6 +229,8 @@ const Slider = (props) => {
         3000
       );
     } else {
+      audioPlayerRef.audioEl.current.play();
+
       console.log("item index result : ", itemIndex + 1);
       // setStopIndex(itemIndex + 1);
       stopIndex = itemIndex + 1;
@@ -299,7 +300,7 @@ const Slider = (props) => {
 
       <div className="detail">
         {/* <p onClick={spinTheWheel}>Try for free</p> */}
-        <button onClick={() => OnClickSpin(true)}>Open Box(1 SOL)</button>
+        {/* <button onClick={() => OnClickSpin(true)}>Open Box(1 SOL)</button> */}
         <button onClick={() => OnClickSpin(false)}>Open Box(1.5 Token)</button>
       </div>
     </div>
