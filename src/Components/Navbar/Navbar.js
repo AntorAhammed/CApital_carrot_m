@@ -4,13 +4,9 @@ import { BsFillAwardFill } from "react-icons/bs";
 import { MdLightbulbOutline } from "react-icons/md";
 import { useEffect, useState } from "react";
 import ConnectToPhantom from "./ConnectToPhantom";
-import {WalletConnect} from './wallet'
+import { WalletConnect } from './wallet'
 
 const Navbar = () => {
-
-  const onConnectWallet = () => {
-
-  }
 
   return (
     <div className="navbar">
@@ -23,14 +19,10 @@ const Navbar = () => {
             {/* <li><a href="#"><BsFillAwardFill/>Award winning platform</a></li> */}
           </div>
         </div>
+
         <div className="connect_metamsk11">
-          <button className="eth_mainnet_btn">SOL Mainnet</button>
-          <div className="light"><MdLightbulbOutline /></div>
-          {/* <ConnectToPhantom /> */}
+          {/* <div className="light"><MdLightbulbOutline /></div> */}
           <WalletConnect />
-
-
-          {/* <button className="connect_metamsk_btn" onClick={onConnectWallet}>Connect Phantom</button> */}
         </div>
       </div>
     </div>

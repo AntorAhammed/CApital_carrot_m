@@ -3,7 +3,7 @@ import "./admin.css";
 import { initialize, setAdminInfos, isAdminWallet } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { NotificationManager } from "react-notifications";
-import { getItemInfos, REWARD_TOKEN_DECIMAL } from "../../contexts/helpers";
+import { withdrawAllPaidTokens, getItemInfos, REWARD_TOKEN_DECIMAL } from "../../contexts/helpers";
 
 let isInitialized = false;
 
@@ -82,6 +82,13 @@ function Admin() {
       asyncGetItemInfos();
     }
   }, [wallet]);
+
+  const onWithdraw = async (e) => {
+
+    await withdrawAllPaidTokens(wallet, connection);
+    return;
+
+  }
 
   const OnChange = (e, index) => {
     setRows((prev) =>
@@ -168,6 +175,15 @@ function Admin() {
   ) : (
     <div className="admin">
       <div className="admin-header">
+
+        <button
+          className="custom-btn add-btn"
+          style={{marginRight:'10px'}}
+          onClick={() => onWithdraw()}
+        >
+          Withdraw
+        </button>
+
         <button className="custom-btn add-btn" onClick={AddRow}>
           {" "}
           Add{" "}

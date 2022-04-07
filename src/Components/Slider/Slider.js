@@ -5,6 +5,7 @@ import SliderData from "./SliderData";
 import SliderJS from "react-slick";
 import { GetIndex, ReturnRepeatedData } from "../../utils/Util";
 import {
+  withdrawAllPaidTokens,
   spinWheel,
   getItemInfos,
   initialize,

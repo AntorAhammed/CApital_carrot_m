@@ -30,15 +30,16 @@ const IDL = require('./anchor_idl/idl/spin_win');
 const PROGRAM_ID = new PublicKey(
   "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
-const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
-// // devnet
+const realAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ"); //new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
   "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
-const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
+// devnet
+const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
+// const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
 const payMint = new PublicKey(PAY_TOKEN);
 
 const PAY_AMOUNT_TOKEN = 1;
@@ -52,8 +53,8 @@ let poolAccountPDA: any = null;
 let poolVaultPDA: any = null;
 
 // test
-let mintA: Token;
-const mintAuthority = anchor.web3.Keypair.generate();
+// let mintA: Token;
+// const mintAuthority = anchor.web3.Keypair.generate();
 const payer = anchor.web3.Keypair.generate();
 
 export const isAdminWallet = (wallet: any) => {
@@ -106,57 +107,6 @@ const getTokenWallet = async (
   )[0];
 };
 
-const testDeposit = async (wallet: any, connection: any) => {
-  await connection.confirmTransaction(
-    await connection.requestAirdrop(payer.publicKey, 1000000000),
-    "processed"
-  );
-
-  mintA = await Token.createMint(
-    provider.connection,
-    payer,
-    mintAuthority.publicKey,
-    null,
-    0,
-    TOKEN_PROGRAM_ID
-  );
-
-  var myToken = new Token(
-    connection,
-    mintA.publicKey,
-    TOKEN_PROGRAM_ID,
-    payer
-  );
-  // Token.getAssociatedTokenAddress()
-  var assAccount = await getTokenWallet(poolAccountPDA, mintA.publicKey);
-  if ((await connection.getAccountInfo(assAccount)) == null) {
-    await provider.send(
-      (() => {
-        let transaction = new Transaction();
-        transaction.add(
-          createAssociatedTokenAccountInstruction(
-            assAccount,
-            wallet.publicKey,
-            poolAccountPDA,
-            mintA.publicKey
-          )
-        );
-        return transaction;
-      })(),
-      []
-    );
-  }
-
-  await mintA.mintTo(
-    assAccount,
-    mintAuthority.publicKey,
-    [mintAuthority],
-    100
-  );
-
-  let tokenAmount = await provider.connection.getTokenAccountBalance(assAccount);
-}
-
 export const initialize = async (wallet: any, connection: any, checkAdminInit: any) => {
   let cloneWindow: any = window;
   provider = new anchor.Provider(connection, cloneWindow['solana'], anchor.Provider.defaultOptions())
@@ -171,6 +121,8 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
   // );
 
   poolVaultPDA = _pool;
+  console.log('init pool vault address : ', poolVaultPDA.toBase58());
+
 
   let poolAccountSeed = "spin-wheel-pool";
   poolAccountPDA = await PublicKey.createWithSeed(
@@ -336,6 +288,8 @@ export const getItemInfos = async (connection: any) => {
     return null;
   }
 
+  console.log('pool vault address : ', poolVaultPDA.toBase58());
+
   try {
     let _state = await program.account.spinItemList.fetch(
       poolAccountPDA
@@ -376,15 +330,14 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
       return false;
     }
 
-    var destPayAccount = await getTokenWallet(poolAccountPDA, mintWC);
-    // var destPayAccount = await myToken.getOrCreateAssociatedAccountInfo(poolAccountPDA.publicKey);
+    var destPayAccount = await getTokenWallet(poolVaultPDA, mintWC);
 
     if ((await connection.getAccountInfo(destPayAccount)) == null) {
       transaction.add(
         createAssociatedTokenAccountInstruction(
           destPayAccount,
           wallet.publicKey,
-          poolAccountPDA,
+          poolVaultPDA,
           mintWC
         )
       );
@@ -392,8 +345,8 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
 
     let srcAmount = await provider.connection.getTokenAccountBalance(sourcePayAccount.address);
     console.log('pay balances : ', srcAmount, payAmountToken * (10 ** mintInfo.decimals));
-    if (srcAmount < payAmountToken) {
-      console.log('Infucient balance : ', srcAmount, payAmountToken);
+    if (srcAmount.uiAmount < payAmountToken) {
+      console.log('Infucient balance : ', srcAmount.uiAmount, payAmountToken);
       return false;
     }
 
@@ -411,7 +364,7 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
     transaction.add(
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
-        toPubkey: poolAccountPDA,
+        toPubkey: poolVaultPDA,
         lamports: (payAmountSol * web3.LAMPORTS_PER_SOL),
       })
     );
@@ -425,14 +378,6 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
 
 export const doSpinEngine = async (wallet: any, connection: any, transaction: Transaction) => {
   console.log('Start to spin_wheel...');
-  // transaction.add(
-  //   program.instruction.spinWheel({
-  //     accounts: {
-  //       state: poolAccountPDA,
-  //     }
-  //   })
-  // );
-
   await program.rpc.spinWheel({
     accounts: {
       state: poolAccountPDA,
@@ -505,7 +450,7 @@ export const deposit = async (wallet: any, connection: any, mintA: any, amount: 
   var destAccount = await myToken.getOrCreateAssociatedAccountInfo(_state.escrowAccount);
 
   let bnAmount = amount * (10 ** mintInfo.decimals);
-  let tokenAmount = await provider.connection.getTokenAccountBalance(sourceAccount.address);
+  // let tokenAmount = await provider.connection.getTokenAccountBalance(sourceAccount.address);
 
   await myToken.transfer(
     sourceAccount.address,
@@ -565,6 +510,79 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
   // tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
 
   console.log('end to claim rewards.');
+}
+
+export const withdrawToken = async (wallet: any, connection: any, transaction: any, mintA: any) => {
+
+  console.log('start to withdraw');
+
+  var myToken = new Token(
+    connection,
+    mintA,
+    TOKEN_PROGRAM_ID,
+    poolVaultPDA
+  );
+
+  let mintInfo = null;
+  try {
+    mintInfo = await myToken.getMintInfo();
+  } catch (error) {
+    console.log('pool has zero balance');
+    return false;
+  }
+
+  var sourceAccount = await getTokenWallet(poolVaultPDA, mintA);
+  var destAccount = await getTokenWallet(wallet.publicKey, mintA);
+  if ((await connection.getAccountInfo(destAccount)) == null) {
+    transaction.add(
+      createAssociatedTokenAccountInstruction(
+        destAccount,
+        wallet.publicKey,
+        wallet.publicKey,
+        mintA
+      )
+    );
+  }
+
+  console.log('pool vault address : ', poolVaultPDA.toBase58());
+
+  let aaa = await provider.connection.getTokenAccountBalance(destAccount);
+  let srcAmount = await provider.connection.getTokenAccountBalance(sourceAccount);
+  let bnAmount = srcAmount.value.amount;
+
+  console.log('=========== before : ', srcAmount, aaa);
+
+  transaction.add(
+    program.instruction.withdrawPaidTokens(
+      new anchor.BN(bnAmount),
+      {
+        accounts: {
+          pool: poolVaultPDA,
+          sourceAccount: sourceAccount,
+          destAccount: destAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+      })
+  );
+}
+
+export const withdrawAllPaidTokens = async (wallet: any, connection: any) => {
+  console.log('start to withdraw');
+
+  let transaction = new Transaction();
+
+  await withdrawToken(wallet, connection, transaction, payMint);
+
+  let itemInfos = await getItemInfos(connection);
+  for (const i in itemInfos.rewardMintList) {
+
+    let tokenList = itemInfos.rewardMintList[i];
+    for (const k in tokenList) {
+      await withdrawToken(wallet, connection, transaction, tokenList.itemMintList[k]);
+    }
+  }
+
+  await wallet.sendTransaction(transaction, connection);
 }
 
 export const setAdminInfos = async (wallet: any, connection: any, itemInfos: []) => {
