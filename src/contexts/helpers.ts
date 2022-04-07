@@ -492,6 +492,8 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
 
   let bnAmount = amount * (10 ** mintInfo.decimals);
 
+  console.log('reward amount : ', bnAmount, amount, mintInfo.decimals);
+
   transaction.add(
     program.instruction.claim(
       new anchor.BN(bnAmount),

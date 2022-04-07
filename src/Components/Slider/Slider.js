@@ -215,7 +215,11 @@ const Slider = (props) => {
     var pauseIndex = GetIndex();
     setCurrentIndex(pauseIndex);
     sliderRef.current.slickGoTo(pauseIndex, false);
-    audioPlayerRef.audioEl.current.pause();
+    try {
+      audioPlayerRef.audioEl.current.pause();
+    } catch (error) {
+      console.log('audio pause error : ', error);
+    }
   };
 
   const OnClickSpin = async (paySol) => {
@@ -232,7 +236,11 @@ const Slider = (props) => {
         3000
       );
     } else {
-      audioPlayerRef.audioEl.current.play();
+      try {
+        audioPlayerRef.audioEl.current.play();
+      } catch (error) {
+        console.log('audio playing error : ', error);
+      }
 
       console.log("item index result : ", itemIndex + 1);
       // setStopIndex(itemIndex + 1);
