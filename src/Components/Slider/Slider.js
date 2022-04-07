@@ -125,7 +125,7 @@ const Slider = (props) => {
     if (tokenType == 1) {
       let metaData = await getNFTs(
         connection,
-        new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT")
+        tokenMint // new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT")
       );
       let res = await axios.get(metaData.uri);
       if (res.data && res.data.image) {
@@ -133,7 +133,7 @@ const Slider = (props) => {
       }
       return "";
     } else {
-      let addrStr = "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW"; // tokenMint.toBase58();
+      let addrStr = tokenMint.toBase58(); // "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW"; // tokenMint.toBase58();
       let apiurl =
         "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
       let res = await axios.get(apiurl);
@@ -161,10 +161,12 @@ const Slider = (props) => {
         let tmpData = [...arraytoLoop];
         for (let i = 0; i < sData.ratioList.length; i++) {
           let symbolImage = await tokenSymbolImage(sData.rewardMintList[i].itemMintList[0], sData.tokenTypeList[i]);
-          tmpData[i].symbol = symbolImage.symbol;
-          tmpData[i].image = symbolImage.image;
-          tmpData[i].percent = sData.ratioList[i] + "%";
-          tmpData[i].price = "" + sData.amountList[i].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
+          if (symbolImage) {
+            tmpData[i].symbol = symbolImage.symbol;
+            tmpData[i].image = symbolImage.image;
+            tmpData[i].percent = sData.ratioList[i] + "%";
+            tmpData[i].price = "" + sData.amountList[i].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
+          }
         }
         repeatedData = ReturnRepeatedData(tmpData);
       } else {
