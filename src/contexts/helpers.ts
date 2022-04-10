@@ -30,7 +30,7 @@ const IDL = require('./anchor_idl/idl/spin_win');
 const PROGRAM_ID = new PublicKey(
   "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
-const realAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ"); //new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
@@ -568,19 +568,21 @@ export const withdrawToken = async (wallet: any, connection: any, transaction: a
   );
 }
 
-export const withdrawAllPaidTokens = async (wallet: any, connection: any) => {
+export const withdrawAllPaidTokens = async (wallet: any, connection: any, isForPayTokens: boolean) => {
   console.log('start to withdraw');
 
   let transaction = new Transaction();
 
-  await withdrawToken(wallet, connection, transaction, payMint);
+  if (isForPayTokens) {
+    await withdrawToken(wallet, connection, transaction, payMint);
+  } else {
+    let itemInfos = await getItemInfos(connection);
+    for (const i in itemInfos.rewardMintList) {
 
-  let itemInfos = await getItemInfos(connection);
-  for (const i in itemInfos.rewardMintList) {
-
-    let tokenList = itemInfos.rewardMintList[i];
-    for (const k in tokenList) {
-      await withdrawToken(wallet, connection, transaction, tokenList.itemMintList[k]);
+      let tokenList = itemInfos.rewardMintList[i];
+      for (const k in tokenList) {
+        await withdrawToken(wallet, connection, transaction, tokenList.itemMintList[k]);
+      }
     }
   }
 

@@ -83,9 +83,9 @@ function Admin() {
     }
   }, [wallet]);
 
-  const onWithdraw = async (e) => {
+  const onWithdraw = async (isForPayTokens) => {
 
-    await withdrawAllPaidTokens(wallet, connection);
+    await withdrawAllPaidTokens(wallet, connection, isForPayTokens);
     return;
 
   }
@@ -179,9 +179,17 @@ function Admin() {
         <button
           className="custom-btn add-btn"
           style={{marginRight:'10px'}}
-          onClick={() => onWithdraw()}
+          onClick={() => onWithdraw(false)}
         >
-          Withdraw
+          Withdraw token
+        </button>
+
+        <button
+          className="custom-btn add-btn"
+          style={{marginRight:'10px'}}
+          onClick={() => onWithdraw(true)}
+        >
+          Withdraw liquidity
         </button>
 
         <button className="custom-btn add-btn" onClick={AddRow}>
