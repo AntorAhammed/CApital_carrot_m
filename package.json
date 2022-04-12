@@ -21,6 +21,7 @@
     "@types/react-dom": "^17.0.11",
     "borsh": "^0.7.0",
     "react": "^17.0.2",
+    "react-audio-player": "^0.17.0",
     "react-dom": "^17.0.2",
     "react-icons": "^4.3.1",
     "react-modal": "^3.14.4",

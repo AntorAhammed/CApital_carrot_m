@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import "./admin.css";
-import { initialize, setAdminInfos } from "../../contexts/helpers";
+import { initialize, setAdminInfos, isAdminWallet } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { NotificationManager } from "react-notifications";
-import { getItemInfos } from "../../contexts/helpers";
+import { withdrawAllPaidTokens, getItemInfos, REWARD_TOKEN_DECIMAL } from "../../contexts/helpers";
 
 let isInitialized = false;
-
 
 function Admin() {
   const { connection } = useConnection();
   const wallet = useWallet();
   const REWARD_TOKEN_COUNT_PER_ITEM = 10;
   const MAX_ITEM_COUNT = 15;
+
+  const [isAdmin, setAdmin] = useState(0);  // 0 : non-decided, 1 : admin, 2 : client
 
   const [isLoaded, setLoaded] = useState(false);
 
@@ -30,20 +31,28 @@ function Admin() {
       setLoaded(false);
 
       if (wallet.wallet) {
-        await initialize(wallet, connection);
+        if (isAdminWallet(wallet)) {
+          setAdmin(1);
+        } else {
+          setAdmin(2);
+          return;
+        }
+
+        await initialize(wallet, connection, false);
 
         let sData = null;
         try {
           sData = await getItemInfos(connection);
         } catch (error) {
-          console.log('error to getItemInfos from admin', error);
+          console.log("error to getItemInfos from admin", error);
         }
 
         let tmpRows = [];
         if (sData) {
           for (let i = 0; i < sData.ratioList.length; i++) {
+            let tmpPrice = sData.amountList[i].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
             let row = {
-              price: "" + sData.amountList[i].toNumber(),
+              price: "" + tmpPrice,
               winningPercentage: "" + sData.ratioList[i],
               type: sData.tokenTypeList[i] == 1 ? "nft" : "token",
             };
@@ -67,13 +76,19 @@ function Admin() {
         setLoaded(true);
         isInitialized = true;
       }
-
-    }
+    };
 
     if (isInitialized == false) {
       asyncGetItemInfos();
     }
   }, [wallet]);
+
+  const onWithdraw = async (isForPayTokens) => {
+
+    await withdrawAllPaidTokens(wallet, connection, isForPayTokens);
+    return;
+
+  }
 
   const OnChange = (e, index) => {
     setRows((prev) =>
@@ -96,7 +111,7 @@ function Admin() {
         },
       ]);
     } else {
-      NotificationManager.warning('max count is 15.');
+      NotificationManager.warning("max count is 15.");
     }
   };
 
@@ -112,12 +127,13 @@ function Admin() {
     let itemInfos = [];
     let totalPercent = 0;
     for (let i = 0; i < rows.length; i++) {
-      let strAddrList = rows[i].walletAddress.split(',');
+      let strAddrList = rows[i].walletAddress.split(",");
       let addrCnt = strAddrList.length;
       if (addrCnt > REWARD_TOKEN_COUNT_PER_ITEM) {
         addrCnt = REWARD_TOKEN_COUNT_PER_ITEM;
         let msgTitle = i + 1 + " item's token count is over flow";
-        let msgCont = "Max Token Count is " + REWARD_TOKEN_COUNT_PER_ITEM + ". ";
+        let msgCont =
+          "Max Token Count is " + REWARD_TOKEN_COUNT_PER_ITEM + ". ";
         NotificationManager.warning(msgTitle, msgCont, 3000);
       }
       let tokenAddrList = [];
@@ -128,11 +144,11 @@ function Admin() {
       itemInfos.push({
         tokenAddrList: tokenAddrList,
         tokenType: rows[i].type == "nft" ? 1 : 0,
-        price: rows[i].price,
-        winningPercentage: rows[i].winningPercentage,
+        price: Number(rows[i].price),
+        winningPercentage: Number(rows[i].winningPercentage),
       });
 
-      totalPercent += rows[i].winningPercentage;
+      totalPercent += Number(rows[i].winningPercentage);
     }
 
     if (totalPercent != 100) {
@@ -150,13 +166,32 @@ function Admin() {
     // }
 
     setAdminInfos(wallet, connection, itemInfos);
-  }
+  };
 
-  return !isLoaded ? (
-    <div><h1>Loading...</h1></div>) :
-    (
+  return isAdmin != 1 ? (<h1>No Admin</h1>) : !isLoaded ? (
+    <div>
+      <h1>Loading...</h1>
+    </div>
+  ) : (
     <div className="admin">
       <div className="admin-header">
+
+        <button
+          className="custom-btn add-btn"
+          style={{marginRight:'10px'}}
+          onClick={() => onWithdraw(false)}
+        >
+          Withdraw token
+        </button>
+
+        <button
+          className="custom-btn add-btn"
+          style={{marginRight:'10px'}}
+          onClick={() => onWithdraw(true)}
+        >
+          Withdraw liquidity
+        </button>
+
         <button className="custom-btn add-btn" onClick={AddRow}>
           {" "}
           Add{" "}
@@ -226,10 +261,7 @@ function Admin() {
         })}
 
       <hr />
-      <button
-        className="submit-btn custom-btn"
-        onClick={onSetRows}
-      >
+      <button className="submit-btn custom-btn" onClick={onSetRows}>
         Submit
       </button>
     </div>
