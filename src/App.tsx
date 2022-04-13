@@ -25,7 +25,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import Admin from "./screens/admin/Admin";
 
 function App() {
-  const network = WalletAdapterNetwork.mainnet-beta;
+  const network = WalletAdapterNetwork.Mainnet;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
   const wallets = useMemo(() => [getPhantomWallet()], []);
 
