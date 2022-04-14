@@ -44,7 +44,7 @@ function Admin() {
         try {
           sData = await getItemInfos(connection);
         } catch (error) {
-          console.log("error to getItemInfos from admin", error);
+          //console.log("error to getItemInfos from admin", error);
         }
 
         let tmpRows = [];

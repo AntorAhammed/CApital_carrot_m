@@ -11,12 +11,12 @@ const uploadFileToIPFS = async (files) => {
         for(let i = 0;i<files.length;i++){
             const added = await client.add(files[i])
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            //console.log("[GD], FileName = ", files[i].name, ", Hash: ", added.path)
+            ////console.log("[GD], FileName = ", files[i].name, ", Hash: ", added.path)
             lists.push(url)
         }
         return lists
     } catch(err) {
-        //console.log("Error uploading file: ", err)
+        ////console.log("Error uploading file: ", err)
         return []
     }    
 }
@@ -37,7 +37,7 @@ const uploadFolderToIPFS = async (files) => {
         const filesUrl = 'https://ipfs.infura.io/ipfs/' + filesHash
         return filesUrl
     } catch(err) {
-        console.log("[GD], Error uploading file: ", err)
+        //console.log("[GD], Error uploading file: ", err)
         return ""
     }    
 }
@@ -48,7 +48,7 @@ const uploadTextToIPFS = async (data) => {
         const added = await client.add(doc)
         return added.path
     }catch(err){
-        //console.log("Error: ", err)
+        ////console.log("Error: ", err)
         return null
     }
 }
