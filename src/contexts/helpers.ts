@@ -17,6 +17,7 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, Token, MintLayout } from
 import * as anchor from '@project-serum/anchor';
 import * as borsh from 'borsh';
 import { METADATA_SCHEMA, Metadata } from './processMetaplexAccounts';
+import { NotificationManager } from 'react-notifications';
 
 
 const MAX_ITEM_COUNT = 15;
@@ -28,10 +29,11 @@ const IDL = require('./anchor_idl/idl/spin_win');
 // );
 // devnet
 const PROGRAM_ID = new PublicKey(
-  "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+  "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+  // "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 
-const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+const realAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ"); //new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
@@ -304,8 +306,10 @@ export const getItemInfos = async (connection: any) => {
 }
 
 
-export const transferFromWalletToContract = async (wallet: any, connection: any, transaction: Transaction, paySol: any, mintWC: any) => {
+export const transferFromWalletToContract = async (wallet: any, connection: any, paySol: any, mintWC: any) => {
   console.log('Start to transfer from wallet to contract...');
+
+  let transaction = new Transaction();
 
   let payAmountToken = PAY_AMOUNT_TOKEN; // token amount
   let payAmountSol = PAY_AMOUNT_SOL; // sol amount
@@ -371,13 +375,25 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
     );
   }
 
+  try {
+    await wallet.sendTransaction(transaction, connection);
+    console.log("SUCCESS");
+
+  } catch (error) {
+    console.log('rejected error : ', error);
+    NotificationManager.error('You should pay to play game');
+    return -2;
+  }
+
   console.log('End to transfer from wallet to contract...');
 
   return true;
 }
 
 
-export const doSpinEngine = async (wallet: any, connection: any, transaction: Transaction) => {
+export const doSpinEngine = async (wallet: any, connection: any) => {
+  let transaction = new Transaction();
+
   console.log('Start to spin_wheel...');
   await program.rpc.spinWheel({
     accounts: {
@@ -421,17 +437,14 @@ export const doSpinEngine = async (wallet: any, connection: any, transaction: Tr
 }
 
 export const spinWheel = async (wallet: any, connection: any, paySol: any) => {
-  let transaction = new Transaction();
+  
+  let payRes = await transferFromWalletToContract(wallet, connection, paySol, payMint);
 
-  // if (await initialize(wallet, connection, transaction) == false) {
-  //   return false;
-  // }
-
-  if (await transferFromWalletToContract(wallet, connection, transaction, paySol, payMint) == false) {
-    return -1;
+  if (payRes != true) {
+    return payRes;
   }
 
-  return await doSpinEngine(wallet, connection, transaction);
+  return await doSpinEngine(wallet, connection);
 }
 
 export const deposit = async (wallet: any, connection: any, mintA: any, amount: any) => {
