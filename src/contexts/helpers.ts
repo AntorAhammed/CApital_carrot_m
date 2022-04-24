@@ -124,7 +124,7 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
   // );
 
   poolVaultPDA = _pool;
-  console.log('init pool vault address : ', poolVaultPDA.toBase58());
+  //console.log('init pool vault address : ', poolVaultPDA.toBase58());
 
 
   let poolAccountSeed = "spin-wheel-pool";
@@ -135,7 +135,7 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
   );
 
   if ((await connection.getAccountInfo(poolAccountPDA)) == null) {
-    console.log('initialize start...', wallet);
+    //console.log('initialize start...', wallet);
     if (checkAdminInit) {
       return false;
     }
@@ -183,7 +183,7 @@ const convertToPubKey = (pubKeyStrList: []) => {
 }
 
 export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) => {
-  console.log('Start to Set Item...');
+  //console.log('Start to Set Item...');
 
   let token_addr_list = [];
   let token_type_list = [];
@@ -203,9 +203,9 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
     }
   }
 
-  console.log('token addrs', token_addr_list);
-  console.log('ratios', ratio_list);
-  console.log('amounts', amount_list);
+  //console.log('token addrs', token_addr_list);
+  //console.log('ratios', ratio_list);
+  //console.log('amounts', amount_list);
 
   for (let i = 0; i < MAX_ITEM_COUNT; i += 2) {
     let transaction = new Transaction();
@@ -235,7 +235,7 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
     await wallet.sendTransaction(transaction, connection);
   }
 
-  console.log('End to Set Item...');
+  //console.log('End to Set Item...');
 
   return true;
 }
@@ -279,9 +279,9 @@ export const getNFTs = async (connection: any, nftAddr: PublicKey) => {
   let accInfo = await connection.getAccountInfo(metadataAccount);
 
   let nftAttr = decodeMetadata(accInfo.data);
-  console.log("nft Name =", nftAttr.data.name);
-  console.log("nft Id =", getIdFromName(nftAttr.data.name));
-  console.log('nftAttr Data', nftAttr);
+  //console.log("nft Name =", nftAttr.data.name);
+  //console.log("nft Id =", getIdFromName(nftAttr.data.name));
+  //console.log('nftAttr Data', nftAttr);
 
   return nftAttr.data;
 }
@@ -291,7 +291,7 @@ export const getItemInfos = async (connection: any) => {
     return null;
   }
 
-  console.log('pool vault address : ', poolVaultPDA.toBase58());
+  //console.log('pool vault address : ', poolVaultPDA.toBase58());
 
   try {
     let _state = await program.account.spinItemList.fetch(
@@ -300,14 +300,14 @@ export const getItemInfos = async (connection: any) => {
 
     return _state;
   } catch (error) {
-    console.log('getItemInfos error : ', error);
+    //console.log('getItemInfos error : ', error);
     return null;
   }
 }
 
 
 export const transferFromWalletToContract = async (wallet: any, connection: any, paySol: any, mintWC: any) => {
-  console.log('Start to transfer from wallet to contract...');
+  //console.log('Start to transfer from wallet to contract...');
 
   let transaction = new Transaction();
 
@@ -322,16 +322,16 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
       wallet
     );
     let mintInfo = await myToken.getMintInfo();
-    console.log('=========== mintInfo ==========', mintInfo);
+    //console.log('=========== mintInfo ==========', mintInfo);
     var sourcePayAccount = null;
     try {
       sourcePayAccount = await myToken.getOrCreateAssociatedAccountInfo(wallet.publicKey);
       if ((await connection.getAccountInfo(sourcePayAccount.address)) == null) {
-        console.log('Zero balance');
+        //console.log('Zero balance');
         return false;
       }
     } catch (error) {
-      console.log('Cannot find payment tokens in your wallet');
+      //console.log('Cannot find payment tokens in your wallet');
       return false;
     }
 
@@ -349,9 +349,9 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
     }
 
     let srcAmount = await provider.connection.getTokenAccountBalance(sourcePayAccount.address);
-    console.log('pay balances : ', srcAmount, payAmountToken * (10 ** mintInfo.decimals));
+    //console.log('pay balances : ', srcAmount, payAmountToken * (10 ** mintInfo.decimals));
     if (srcAmount.uiAmount < payAmountToken) {
-      console.log('Infucient balance : ', srcAmount.uiAmount, payAmountToken);
+      //console.log('Infucient balance : ', srcAmount.uiAmount, payAmountToken);
       return false;
     }
 
@@ -377,15 +377,15 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
 
   try {
     await wallet.sendTransaction(transaction, connection);
-    console.log("SUCCESS");
+    //console.log("SUCCESS");
 
   } catch (error) {
-    console.log('rejected error : ', error);
+    //console.log('rejected error : ', error);
     NotificationManager.error('You should pay to play game');
     return -2;
   }
 
-  console.log('End to transfer from wallet to contract...');
+  //console.log('End to transfer from wallet to contract...');
 
   return true;
 }
@@ -394,7 +394,7 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
 export const doSpinEngine = async (wallet: any, connection: any) => {
   let transaction = new Transaction();
 
-  console.log('Start to spin_wheel...');
+  //console.log('Start to spin_wheel...');
   await program.rpc.spinWheel({
     accounts: {
       state: poolAccountPDA,
@@ -413,10 +413,10 @@ export const doSpinEngine = async (wallet: any, connection: any) => {
     msg += "Collect your reward tokens on website.";
   }
 
-  console.log('pool data', _state);
+  //console.log('pool data', _state);
   let rMintList = _state.rewardMintList[_state.lastSpinindex];
   let amount = _state.amountList[_state.lastSpinindex].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
-  // console.log('reward mint list', rMintList);
+  // //console.log('reward mint list', rMintList);
 
   for (let i = 0; i < rMintList.count; i++) {
     await claimRewards(wallet, connection, transaction, rMintList.itemMintList[i], amount);
@@ -424,14 +424,14 @@ export const doSpinEngine = async (wallet: any, connection: any) => {
 
   try {
     await wallet.sendTransaction(transaction, connection);
-    console.log("SUCCESS");
+    //console.log("SUCCESS");
 
   } catch (error) {
-    console.log('rejected error : ', error);
+    //console.log('rejected error : ', error);
     return -1;
   }
 
-  console.log('End to spin_wheel...');
+  //console.log('End to spin_wheel...');
 
   return _state.lastSpinindex;
 }
@@ -476,7 +476,7 @@ export const deposit = async (wallet: any, connection: any, mintA: any, amount: 
 }
 
 export const claimRewards = async (wallet: any, connection: any, transaction: Transaction, rMint: any, amount: any) => {
-  console.log('start to claim rewards.');
+  //console.log('start to claim rewards.');
 
   var myToken = new Token(
     connection,
@@ -488,7 +488,7 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
   let mintInfo = await myToken.getMintInfo();
   var sourceAccount = await getTokenWallet(poolVaultPDA, rMint);
 
-  // console.log('==========', poolVaultPDA.toBase58(), rMint.toBase58());
+  // //console.log('==========', poolVaultPDA.toBase58(), rMint.toBase58());
 
   var destAccount = await getTokenWallet(wallet.publicKey, rMint);
   if ((await connection.getAccountInfo(destAccount)) == null) {
@@ -506,7 +506,7 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
 
   let bnAmount = amount * (10 ** mintInfo.decimals);
 
-  console.log('reward amount : ', bnAmount, amount, mintInfo.decimals);
+  //console.log('reward amount : ', bnAmount, amount, mintInfo.decimals);
 
   transaction.add(
     program.instruction.claim(
@@ -525,12 +525,12 @@ export const claimRewards = async (wallet: any, connection: any, transaction: Tr
 
   // tokenAmount = await provider.connection.getTokenAccountBalance(destAccount.address);
 
-  console.log('end to claim rewards.');
+  //console.log('end to claim rewards.');
 }
 
 export const withdrawToken = async (wallet: any, connection: any, transaction: any, mintA: any) => {
 
-  console.log('start to withdraw');
+  //console.log('start to withdraw');
 
   var myToken = new Token(
     connection,
@@ -543,7 +543,7 @@ export const withdrawToken = async (wallet: any, connection: any, transaction: a
   try {
     mintInfo = await myToken.getMintInfo();
   } catch (error) {
-    console.log('pool has zero balance');
+    //console.log('pool has zero balance');
     return false;
   }
 
@@ -560,13 +560,13 @@ export const withdrawToken = async (wallet: any, connection: any, transaction: a
     );
   }
 
-  console.log('pool vault address : ', poolVaultPDA.toBase58());
+  //console.log('pool vault address : ', poolVaultPDA.toBase58());
 
   let aaa = await provider.connection.getTokenAccountBalance(destAccount);
   let srcAmount = await provider.connection.getTokenAccountBalance(sourceAccount);
   let bnAmount = srcAmount.value.amount;
 
-  console.log('=========== before : ', srcAmount, aaa);
+  //console.log('=========== before : ', srcAmount, aaa);
 
   transaction.add(
     program.instruction.withdrawPaidTokens(
@@ -583,7 +583,7 @@ export const withdrawToken = async (wallet: any, connection: any, transaction: a
 }
 
 export const withdrawAllPaidTokens = async (wallet: any, connection: any, isForPayTokens: boolean) => {
-  console.log('start to withdraw');
+  //console.log('start to withdraw');
 
   let transaction = new Transaction();
 
@@ -604,21 +604,21 @@ export const withdrawAllPaidTokens = async (wallet: any, connection: any, isForP
 }
 
 export const setAdminInfos = async (wallet: any, connection: any, itemInfos: []) => {
-  console.log('start admin');
+  //console.log('start admin');
   try {
     await initialize(wallet, connection, false);
   } catch (error) {
-    console.log('admin initialize error', error);
+    //console.log('admin initialize error', error);
     return false;
   }
 
   if (await setItemInfos(wallet, connection, itemInfos) == false) {
-    console.log('admin failed');
+    //console.log('admin failed');
 
     return -1;
   }
 
-  console.log('end admin');
+  //console.log('end admin');
 
   return true;
 }
