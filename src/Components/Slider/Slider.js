@@ -226,15 +226,16 @@ const Slider = (props) => {
     setIsLoading(true);
 
     const itemIndex = await spinWheel(wallet, connection, paySol);
-    if (itemIndex == -1) {
-      // rejected & error
+    if (itemIndex < 0) {
       setIsLoading(false);
-
-      NotificationManager.error(
-        "Transaction error",
-        "Please check your network and balanceof wallet",
-        3000
-      );
+      if (itemIndex == -1) {
+        // rejected & error
+        NotificationManager.error(
+          "Transaction error",
+          "Please check your network and balanceof wallet",
+          3000
+        );
+      }
     } else {
       try {
         audioPlayerRef.audioEl.current.play();
