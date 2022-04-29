@@ -38,7 +38,10 @@ function Admin() {
           return;
         }
 
-        await initialize(wallet, connection, false);
+        if (await initialize(wallet, connection, false) == false) {
+          NotificationManager.error('Initializing failed');
+          return;
+        }
 
         let sData = null;
         try {

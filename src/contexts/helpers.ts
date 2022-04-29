@@ -167,7 +167,12 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
       )
     );
 
-    await wallet.sendTransaction(transaction, connection);
+    try {
+      await wallet.sendTransaction(transaction, connection);
+    } catch (error) {
+      console.log('initialize error : ', error);
+      return false;
+    }
   }
 
   return true;
