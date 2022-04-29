@@ -138,7 +138,7 @@ const Slider = (props) => {
         "https://public-api.solscan.io/token/meta?tokenAddress=" + addrStr;
       let res = await axios.get(apiurl);
       if (res.data && res.data.icon) {
-        console.log('111111111111', res.data)
+        //console.log('111111111111', res.data)
         return { symbol: res.data.symbol, image: res.data.icon };
       }
     }
@@ -155,7 +155,7 @@ const Slider = (props) => {
       }
 
       let sData = await getItemInfos(connection);
-      console.log("client item data", sData);
+      //console.log("client item data", sData);
       var repeatedData = null;
       if (sData) {
         let tmpData = [...arraytoLoop];
@@ -218,7 +218,7 @@ const Slider = (props) => {
     try {
       audioPlayerRef.audioEl.current.pause();
     } catch (error) {
-      console.log('audio pause error : ', error);
+      //console.log('audio pause error : ', error);
     }
   };
 
@@ -240,10 +240,10 @@ const Slider = (props) => {
       try {
         audioPlayerRef.audioEl.current.play();
       } catch (error) {
-        console.log('audio playing error : ', error);
+        //console.log('audio playing error : ', error);
       }
 
-      console.log("item index result : ", itemIndex + 1);
+      //console.log("item index result : ", itemIndex + 1);
       // setStopIndex(itemIndex + 1);
       stopIndex = itemIndex + 1;
       setWinnerItem(arraytoLoop[itemIndex]);
