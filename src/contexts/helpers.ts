@@ -29,11 +29,11 @@ const IDL = require('./anchor_idl/idl/spin_win');
 // );
 // devnet
 const PROGRAM_ID = new PublicKey(
-  // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
-  "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+  "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+  // "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 
-const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+const realAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ"); //new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
@@ -41,8 +41,8 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 );
 
 // devnet
-// const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
-const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
+const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
+// const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
 const payMint = new PublicKey(PAY_TOKEN);
 
 const PAY_AMOUNT_TOKEN = 1;
@@ -311,10 +311,8 @@ export const getItemInfos = async (connection: any) => {
 }
 
 
-export const transferFromWalletToContract = async (wallet: any, connection: any, paySol: any, mintWC: any) => {
+export const transferFromWalletToContract = async (wallet: any, connection: any, transaction: Transaction, paySol: any, mintWC: any) => {
   //console.log('Start to transfer from wallet to contract...');
-
-  let transaction = new Transaction();
 
   let payAmountToken = PAY_AMOUNT_TOKEN; // token amount
   let payAmountSol = PAY_AMOUNT_SOL; // sol amount
@@ -381,13 +379,13 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
   }
 
   try {
-    await wallet.sendTransaction(transaction, connection);
+    // await wallet.sendTransaction(transaction, connection);
     //console.log("SUCCESS");
 
   } catch (error) {
     //console.log('rejected error : ', error);
-    NotificationManager.error('You should pay to play game');
-    return -2;
+    // NotificationManager.error('You should pay to play game');
+    // return -2;
   }
 
   //console.log('End to transfer from wallet to contract...');
@@ -395,16 +393,28 @@ export const transferFromWalletToContract = async (wallet: any, connection: any,
   return true;
 }
 
-
-export const doSpinEngine = async (wallet: any, connection: any) => {
+export const spinWheel = async (wallet: any, connection: any, paySol: any) => {
   let transaction = new Transaction();
 
+  let payRes = await transferFromWalletToContract(wallet, connection, transaction, paySol, payMint);
+
   //console.log('Start to spin_wheel...');
-  await program.rpc.spinWheel({
-    accounts: {
-      state: poolAccountPDA,
-    }
-  });
+  transaction.add(
+    program.instruction.spinWheel({
+      accounts: {
+        state: poolAccountPDA,
+      }
+    })
+  );
+
+  try {
+    await wallet.sendTransaction(transaction, connection);
+  } catch (error) {
+    console.log('rejected error : ', error);
+    NotificationManager.error('You should pay to play game');
+    return -2;
+  }
+
   let _state = await program.account.spinItemList.fetch(
     poolAccountPDA
   );
@@ -423,33 +433,25 @@ export const doSpinEngine = async (wallet: any, connection: any) => {
   let amount = _state.amountList[_state.lastSpinindex].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
   // //console.log('reward mint list', rMintList);
 
+  let transaction1 = new Transaction();
   for (let i = 0; i < rMintList.count; i++) {
-    await claimRewards(wallet, connection, transaction, rMintList.itemMintList[i], amount);
+    await claimRewards(wallet, connection, transaction1, rMintList.itemMintList[i], amount);
   }
 
   try {
-    await wallet.sendTransaction(transaction, connection);
+    await wallet.sendTransaction(transaction1, connection);
     //console.log("SUCCESS");
 
   } catch (error) {
-    //console.log('rejected error : ', error);
+    console.log('rejected error : ', error);
     return -1;
   }
 
   //console.log('End to spin_wheel...');
 
   return _state.lastSpinindex;
-}
 
-export const spinWheel = async (wallet: any, connection: any, paySol: any) => {
-  
-  let payRes = await transferFromWalletToContract(wallet, connection, paySol, payMint);
-
-  if (payRes != true) {
-    return payRes;
-  }
-
-  return await doSpinEngine(wallet, connection);
+  // return await doSpinEngine(wallet, connection);
 }
 
 export const deposit = async (wallet: any, connection: any, mintA: any, amount: any) => {
