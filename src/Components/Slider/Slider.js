@@ -14,7 +14,8 @@ import {
 } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { AiOutlineConsoleSql } from "react-icons/ai";
-
+// import UseWindowSize from "react-use/lib/useWindowSize";
+import Confetti from "react-confetti";
 import Modal from "react-modal";
 import { setTokenSourceMapRange } from "typescript";
 import Loader from "../Loader/Loader";
@@ -278,6 +279,7 @@ const Slider = (props) => {
           <h3>{winnerItem && winnerItem.price} </h3>
           <img src={winnerItem && winnerItem.image} alt="" />
         </Modal>
+        {modalIsOpen && <Confetti />}
       </div>
       <SliderJS {...config} ref={sliderRef}>
         {arraytoLoop &&
