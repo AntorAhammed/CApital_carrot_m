@@ -33,7 +33,7 @@ const PROGRAM_ID = new PublicKey(
   // "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 
-const realAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ"); //new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
+const realAdminKey = new PublicKey("3NvmQKU2361ZEkcTQPVovh6uVghpdFVijpme7C88s2bC");
 const initAdminKey = new PublicKey("D36zdpeXt7Agaatt97MiX9kWqwbjyVhMFoZBN2oMvQmZ");
 
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
@@ -41,8 +41,8 @@ const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 );
 
 // devnet
-const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
-// const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
+// const PAY_TOKEN = '5HkxgJ2JPtTTGJZ4r2HAETpNtkotWirte7CXQ32qyELS';
+const PAY_TOKEN = 'ToTuLunrMF2eQtvj7p6UtU7Jc38mbZZ8do21fg61Qg6';
 const payMint = new PublicKey(PAY_TOKEN);
 
 const PAY_AMOUNT_TOKEN = 1;
