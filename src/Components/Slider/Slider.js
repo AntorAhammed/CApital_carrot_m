@@ -123,14 +123,19 @@ const Slider = (props) => {
 
   const tokenSymbolImage = async (tokenMint, tokenType) => {
     if (tokenType == 1) {
-      let metaData = await getNFTs(
-        connection,
-        tokenMint // new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT")
-      );
-      let res = await axios.get(metaData.uri);
-      if (res.data && res.data.image) {
-        return { symbol: res.data.symbol, image: res.data.image };
+      try {
+        let metaData = await getNFTs(
+          connection,
+          tokenMint // new PublicKey("DBnoYYwj42y3tVYJfSsnFjtn97qv81CVxxdcexGumZrT")
+        );
+        let res = await axios.get(metaData.uri);
+        if (res.data && res.data.image) {
+          return { symbol: res.data.symbol, image: res.data.image };
+        }
+      } catch (error) {
+        console.log('error to get net metadata', error);
       }
+
       return "";
     } else {
       let addrStr = tokenMint.toBase58(); // "BXXkv6z8ykpG1yuvUDPgh732wzVHB69RnB9YgSYh3itW"; // tokenMint.toBase58();

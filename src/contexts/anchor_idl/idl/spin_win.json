@@ -62,7 +62,7 @@
         },
         {
           "name": "ratio",
-          "type": "u8"
+          "type": "u32"
         },
         {
           "name": "amount",
@@ -103,7 +103,7 @@
         },
         {
           "name": "ratio",
-          "type": "u8"
+          "type": "u32"
         },
         {
           "name": "amount",
@@ -120,7 +120,10 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [],
+      "returns": {
+        "defined": "(u8)"
+      }
     },
     {
       "name": "claim",
@@ -241,7 +244,7 @@
             "name": "ratioList",
             "type": {
               "array": [
-                "u8",
+                "u32",
                 15
               ]
             }
@@ -303,6 +306,6 @@
     }
   ],
   "metadata": {
-    "address": "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+    "address": "BFGm8bogh8ojiYpeDvesp6xpzNcE3WxS8YbzVPPQHBdm"
   }
 }

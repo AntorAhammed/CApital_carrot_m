@@ -3,7 +3,7 @@ import "./admin.css";
 import { initialize, setAdminInfos, isAdminWallet } from "../../contexts/helpers";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { NotificationManager } from "react-notifications";
-import { withdrawAllPaidTokens, getItemInfos, REWARD_TOKEN_DECIMAL } from "../../contexts/helpers";
+import { withdrawAllPaidTokens, getItemInfos, REWARD_TOKEN_DECIMAL, PERCENTAGE_DECIMALS } from "../../contexts/helpers";
 
 let isInitialized = false;
 
@@ -54,9 +54,10 @@ function Admin() {
         if (sData) {
           for (let i = 0; i < sData.ratioList.length; i++) {
             let tmpPrice = sData.amountList[i].toNumber() / (10 ** REWARD_TOKEN_DECIMAL);
+            let tmpRatio = Number(sData.ratioList[i]) / (10 ** PERCENTAGE_DECIMALS);
             let row = {
               price: "" + tmpPrice,
-              winningPercentage: "" + sData.ratioList[i],
+              winningPercentage: "" + tmpRatio, //sData.ratioList[i],
               type: sData.tokenTypeList[i] == 1 ? "nft" : "token",
             };
 

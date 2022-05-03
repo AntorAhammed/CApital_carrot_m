@@ -29,7 +29,7 @@ const IDL = require('./anchor_idl/idl/spin_win');
 // );
 // devnet
 const PROGRAM_ID = new PublicKey(
-  "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
+  "BFGm8bogh8ojiYpeDvesp6xpzNcE3WxS8YbzVPPQHBdm"
   // "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 
@@ -49,6 +49,7 @@ const PAY_AMOUNT_TOKEN = 1;
 const PAY_AMOUNT_SOL = 0.5;
 
 export const REWARD_TOKEN_DECIMAL = 9;
+export const PERCENTAGE_DECIMALS = 3;
 
 let program: any = null;
 let provider: any = null;
@@ -142,7 +143,7 @@ export const initialize = async (wallet: any, connection: any, checkAdminInit: a
 
     let transaction = new Transaction();
 
-    let POOL_SPACE = 4975;
+    let POOL_SPACE = 5020;
     transaction.add(SystemProgram.createAccountWithSeed({
       fromPubkey: wallet.publicKey,
       basePubkey: initAdminKey,
@@ -198,7 +199,8 @@ export const setItemInfos = async (wallet: any, connection: any, itemInfos: []) 
     if (i < itemInfos.length) {
       token_addr_list.push(convertToPubKey(itemInfos[i]["tokenAddrList"]));
       token_type_list.push(Number(itemInfos[i]["tokenType"]));
-      ratio_list.push(Number(itemInfos[i]["winningPercentage"]));
+      let bigPercent = Number(itemInfos[i]["winningPercentage"]) * (10 ** PERCENTAGE_DECIMALS);
+      ratio_list.push(Number(itemInfos[i]["winningPercentage"]) * (10 ** PERCENTAGE_DECIMALS));
       amount_list.push(new anchor.BN(itemInfos[i]["price"] * (10 ** REWARD_TOKEN_DECIMAL)));
     } else {
       token_addr_list.push([]);
