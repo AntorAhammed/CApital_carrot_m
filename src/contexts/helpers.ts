@@ -29,7 +29,7 @@ const IDL = require('./anchor_idl/idl/spin_win');
 // );
 // devnet
 const PROGRAM_ID = new PublicKey(
-  "BFGm8bogh8ojiYpeDvesp6xpzNcE3WxS8YbzVPPQHBdm"
+  "Buk7QD4HqT4Wyqfzo6V1d4Bsvsf7Kv4wLDF9wTUmJJ8N"
   // "HrZtfLyBEu48M5jLeuM8Bn8r7uDoCGgWcNTocEwbx98K" // "G2roHNqPvkVz4hko9Ha8443QrFUGg5YFkLDqW7Cyt1LK"
 );
 
